@@ -133,7 +133,7 @@ public class TraceIconMenu extends IconMenuWithPagesGui {
 	private void createAndAddRecordingMenu() {
 		IconMenuPage mp;
 		// Recordings
-		if (Configuration.getCfgBitState(Configuration.CFGBIT_WAYPT_OFFER_PREDEF)) {
+		if (false && Configuration.getCfgBitState(Configuration.CFGBIT_WAYPT_OFFER_PREDEF)) {
 			// FIXME read from config file and/or add a UI to change these
 			predefsToShow = predefs;
 		}

@@ -22,7 +22,9 @@ public class GuiSetupRecordings extends Form implements CommandListener {
 	private final TextField tfGpxRecordMinimumSecs;
 	private final TextField tfGpxRecordMinimumDistanceMeters;
 	private final TextField tfGpxRecordAlwaysDistanceMeters;
+	//#if false
 	private final ChoiceGroup otherOpts;
+	//#endif
 
 	// Commands
 	private static final Command CMD_SAVE = new Command(Locale.get("generic.Save")/*Save*/, 
@@ -91,13 +93,16 @@ public class GuiSetupRecordings extends Form implements CommandListener {
 		append(gpxOptsGroup);
 		append(choiceWptInTrack);
 
+		//#if false
 		String [] other = new String[1];
 		other[0] = Locale.get("guisetupgui.PredefWpts") /*Predefined way points*/;
 		otherOpts = new ChoiceGroup(Locale.get("guisetupgui.OtherOpt") /*Other options:*/, 
 				Choice.MULTIPLE, other, null);
 		otherOpts.setSelectedIndex(0,
 				Configuration.getCfgBitSavedState(Configuration.CFGBIT_WAYPT_OFFER_PREDEF));
+		
 		append(otherOpts);
+		//#endif
 
 		addCommand(CMD_CANCEL);
 		addCommand(CMD_SAVE);
@@ -157,8 +162,10 @@ public class GuiSetupRecordings extends Form implements CommandListener {
 			gpxOptsGroup.getSelectedFlags(selGpxName);
 			Configuration.setCfgBitSavedState(Configuration.CFGBIT_GPX_ASK_TRACKNAME_START, selGpxName[0]);
 			Configuration.setCfgBitSavedState(Configuration.CFGBIT_GPX_ASK_TRACKNAME_STOP, selGpxName[1]);
+			//#if false
 			Configuration.setCfgBitSavedState(Configuration.CFGBIT_WAYPT_OFFER_PREDEF,
 					otherOpts.isSelected(0));
+			//#endif
 			parent.show();
 		}
 	}
