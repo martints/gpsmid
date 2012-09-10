@@ -1,3 +1,6 @@
+    - reverted possibe bugfix for startup trace crash issue on Nokia E72 when not in full-screen mode
+      and Gps activated and started at startup, as it didn't fix the bug.
+
 GpsMid 0.8.2
     *** Map Display ***
     - some support for on-the web raster map form; if a valid raster map url
@@ -26,7 +29,7 @@ GpsMid 0.8.1
     - bugfix for trace icon menu crash on non-touch phones with no internet access
       (full-connected with internet access switched off in GpsMid menu, non-connected versions)
     - possibe bugfix for startup trace crash issue on Nokia E72 when not in full-screen mode
-      and Gps activated and 
+      and Gps activated and started at startup
     *** Osm2GpsMid / Osm2GpsMid GUI ***
     - add .properties option for honoring barriers, useBarriers; make option off by default
 
