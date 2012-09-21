@@ -2144,10 +2144,11 @@ public class GuiSearch extends Canvas implements CommandListener,
 				if (searchCanon.length() > 0) {
 					sb.append(" (key " + searchCanon.toString() + ")");
 				} else {
+					sb.append(" ");
 					if (sortByDist()) {
-						sb.append(Locale.get("guisearch.bydistance")/* by distance*/);
+						sb.append(Locale.get("guisearch.bydistance")/*by distance*/);
 					} else {
-						sb.append(Locale.get("guisearch.byname")/* by name*/);
+						sb.append(Locale.get("guisearch.byname")/*by name*/);
 					}
 				}
 				break;

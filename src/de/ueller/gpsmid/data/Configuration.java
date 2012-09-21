@@ -1726,7 +1726,8 @@ public class Configuration {
 				// file not found, but some callers of getMapResource() only handle IOEs.
 				throw new IOException(Locale.get("configuration.ExFNFCouldnt")
 						/*Could not find file */ + name +
-						Locale.get("configuration.ExFNFJar")/* in JAR.*/);
+						" " +
+						Locale.get("configuration.ExFNFJar")/*in JAR.*/);
 			}
 		}
 		if (mapFileUrl == null) {
@@ -1756,7 +1757,8 @@ public class Configuration {
 			} catch (IOException ioe) {
 				throw new IOException(Locale.get("configuration.ExFNFCouldnt")
 						/*Could not find file */ + name +
-						Locale.get("configuration.ExFNFFilesys")/* in file system.*/);					
+						" " +
+						Locale.get("configuration.ExFNFFilesys")/*in file system.*/);					
 			}
 			//#else
 			try {
@@ -1778,7 +1780,8 @@ public class Configuration {
 			} catch (IOException ioe) {
 				throw new IOException(Locale.get("configuration.ExFNFCouldnt")
 						/*Could not find file */ + name +
-						Locale.get("configuration.ExFNFFilesys")/* in file system.*/);					
+						" " +
+						Locale.get("configuration.ExFNFFilesys")/*in file system.*/);					
 			}
 			//#endif
 		} else {
@@ -1802,7 +1805,8 @@ public class Configuration {
 				// but some callers of getMapResource() only handle IOEs.
 				throw new IOException(Locale.get("configuration.ExFNFCouldnt")
 						/*Could not find file */ + name +
-						Locale.get("configuration.ExFNFZip")/* in ZIP.*/);					
+						" " +
+						Locale.get("configuration.ExFNFZip")/*in ZIP.*/);					
 			}
 		}
 		//#else
