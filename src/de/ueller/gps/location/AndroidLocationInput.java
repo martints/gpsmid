@@ -25,7 +25,9 @@ import java.util.Vector;
 import android.os.Bundle;
 import android.os.Looper;
 import de.enough.polish.android.midlet.MidletBridge;
+import android.app.Activity;
 import android.content.Context;
+import android.content.Intent;
 import android.location.Location;
 import android.location.LocationListener;
 import android.location.LocationManager;
@@ -35,11 +37,14 @@ import android.location.GpsStatus;
 import android.location.GpsStatus.Listener;
 import android.location.GpsStatus.NmeaListener;
 import android.location.GpsSatellite;
+import android.provider.Settings;
+
 import java.util.Iterator;
 //#endif
 
 import de.ueller.gps.Satellite;
 import de.ueller.gpsmid.data.Position;
+import de.ueller.gpsmid.ui.Trace;
 import de.ueller.util.Logger;
 import de.ueller.util.StringTokenizer;
 
@@ -82,6 +87,13 @@ public class AndroidLocationInput
 	
 	public AndroidLocationInput() {
 		this.receiverList = new LocationMsgReceiverList();
+		LocationManager locManager = (LocationManager)MidletBridge.instance.getSystemService(Context.LOCATION_SERVICE);
+
+		// show Android's location settings if GPS_PROVIDER is not enabled
+		if (!locManager.isProviderEnabled(LocationManager.GPS_PROVIDER)) {
+			Trace.getInstance().alert(Locale.get("configuration.Android"), Locale.get("androidlocationinput.ActivateGPS"), 10000);
+			//MidletBridge.getInstance().startActivity(new Intent(Settings.ACTION_LOCATION_SOURCE_SETTINGS));
+		}
 	}
 
 	public boolean init(LocationMsgReceiver receiver) {
