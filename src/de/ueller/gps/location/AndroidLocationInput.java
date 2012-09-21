@@ -85,6 +85,8 @@ public class AndroidLocationInput
 	/** Array with information about the satellites */
 	private Satellite satellites[] = new Satellite[36];
 	
+	private static boolean androidSettingsShown = false;
+	
 	public AndroidLocationInput() {
 		this.receiverList = new LocationMsgReceiverList();
 		LocationManager locManager = (LocationManager)MidletBridge.instance.getSystemService(Context.LOCATION_SERVICE);
@@ -92,7 +94,10 @@ public class AndroidLocationInput
 		// show Android's location settings if GPS_PROVIDER is not enabled
 		if (!locManager.isProviderEnabled(LocationManager.GPS_PROVIDER)) {
 			Trace.getInstance().alert(Locale.get("configuration.Android"), Locale.get("androidlocationinput.ActivateGPS"), 10000);
-			//MidletBridge.getInstance().startActivity(new Intent(Settings.ACTION_LOCATION_SOURCE_SETTINGS));
+			if (!androidSettingsShown) {
+				MidletBridge.getInstance().startActivity(new Intent(Settings.ACTION_LOCATION_SOURCE_SETTINGS));
+				androidSettingsShown = true;
+			}
 		}
 	}
 
