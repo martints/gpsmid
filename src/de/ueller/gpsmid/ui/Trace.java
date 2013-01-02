@@ -360,6 +360,8 @@ CompassReceiver, Runnable , GpsMidDisplayable, CompletionListener, IconActionPer
 	
 	/** Flag if a route is currently being calculated */
 	public volatile boolean routeCalc = false;
+	/** Flag if routing is started: Routing is started until the user stops explicitly routing or sets a new destination */
+	public volatile boolean routingStarted = false;
 	public Tile tiles[] = new Tile[DictReader.NUM_DICT_ZOOMLEVELS];
 	public volatile boolean baseTilesRead = false;
 	
@@ -1024,13 +1026,13 @@ CompassReceiver, Runnable , GpsMidDisplayable, CompletionListener, IconActionPer
 	public synchronized void pause() {
 		logger.debug("Pause application called");
 		if (imageCollector != null) {
-			if (! (routeCalc || route != null)) {
+			if (! routingStarted) {
 				logger.debug("Suspending imageCollector");
 				imageCollector.suspend();
 			}
 		}
 		// don't pause if we're logging GPX or routing
-		if (locationProducer != null && !gpx.isRecordingTrk() && ! (routeCalc || route != null)) {
+		if (locationProducer != null && !gpx.isRecordingTrk() && !routingStarted) {
 			logger.debug("Closing locationProducer");
 			locationProducer.close();
 			// wait for locationProducer to close
@@ -1088,7 +1090,7 @@ CompassReceiver, Runnable , GpsMidDisplayable, CompletionListener, IconActionPer
 				//#debug debug
 				logger.debug("autoRouteRecalculate");
 				// recalculate route
-				commandAction(ROUTING_START_CMD);
+				commandAction(ROUTING_RECALC_CMD);
 			}
 		}
 	}
@@ -1557,7 +1559,7 @@ CompassReceiver, Runnable , GpsMidDisplayable, CompletionListener, IconActionPer
 			if (c == CMDS[ROUTINGS_CMD]) {
 				if (routingsMenu == null) {
 					String[] elements = new String[4];
-					if (routeCalc || route != null) {
+					if (routingStarted) {
 						elements[0] = Locale.get("trace.StopRouting")/*Stop routing*/;
 					} else {
 						elements[0] = Locale.get("trace.CalculateRoute")/*Calculate route*/;
@@ -1632,7 +1634,7 @@ CompassReceiver, Runnable , GpsMidDisplayable, CompletionListener, IconActionPer
 					show();
 					switch (routingsMenu.getSelectedIndex()) {
 					case 0: {
-						if (routeCalc || route != null) {
+						if (routingStarted) {
 							commandAction(ROUTING_STOP_CMD);
 						} else {
 							commandAction(ROUTING_START_WITH_OPTIONAL_MODE_SELECT_CMD);
@@ -1679,7 +1681,7 @@ CompassReceiver, Runnable , GpsMidDisplayable, CompletionListener, IconActionPer
 			}
 			//#endif
 			if (c == CMDS[ROUTING_TOGGLE_CMD]) {
-				if (routeCalc || route != null) {
+				if (routingStarted) {
 					commandAction(ROUTING_STOP_CMD);
 				} else {
 					commandAction(ROUTING_START_WITH_OPTIONAL_MODE_SELECT_CMD);
@@ -1723,10 +1725,13 @@ CompassReceiver, Runnable , GpsMidDisplayable, CompletionListener, IconActionPer
 			}
 			if (c == CMDS[ROUTING_STOP_CMD]) {
 				stopRouting(true);
+				endRouting();
+				setRoute(null);
 				return;
 			}
 			if (c == CMDS[ROUTING_RECALC_CMD]) {
 				stopRouting(false);
+				endRouting();
 				startRouting();
 				return;
 			}
@@ -1996,7 +2001,21 @@ CompassReceiver, Runnable , GpsMidDisplayable, CompletionListener, IconActionPer
 				newDataReady();
 				return;
 			}
-			
+			if (c == CMDS[ROTATE_TRAVEL_MODE_CMD]) {				
+				int mode = Configuration.getTravelModeNr();
+				mode++;
+				if (mode >= Legend.getTravelModes().length) {
+					mode = 0;
+				}
+				Configuration.setTravelMode(mode);
+				if (Configuration.getCfgBitState(Configuration.CFGBIT_DRAW_NON_TRAVELMODE_WAYS_DARKER)) {
+						newDataReady();
+				}
+				if (routingStarted) {
+					commandAction(ROUTING_RECALC_CMD);
+				}
+				return;
+			}
 			if (! routeCalc) {
 				//#if polish.api.osm-editing
 				if (c == CMDS[RETRIEVE_XML] && internetAccessAllowed()) {
@@ -2102,18 +2121,6 @@ CompassReceiver, Runnable , GpsMidDisplayable, CompletionListener, IconActionPer
 					setDestination(null);
 					return;
 				}
-				if (c == CMDS[ROTATE_TRAVEL_MODE_CMD]) {
-					int mode = Configuration.getTravelModeNr();
-					mode++;
-					if (mode >= Legend.getTravelModes().length) {
-						mode = 0;
-					}
-					Configuration.setTravelMode(mode);
-					if (Configuration.getCfgBitState(Configuration.CFGBIT_DRAW_NON_TRAVELMODE_WAYS_DARKER)) {
-							newDataReady();
-					}
-					return;
-				}
 			} else {
 				alert(Locale.get("trace.Error")/*Error*/, Locale.get("trace.CurrentlyInRouteCalculation")/*Currently in route calculation*/, 2000);
 			}
@@ -2128,24 +2135,21 @@ CompassReceiver, Runnable , GpsMidDisplayable, CompletionListener, IconActionPer
 			if (isZoomedOutTooFarForRouteCalculation()) {
 				return;
 			}
-				
-			if (!routeCalc || RouteLineProducer.isRunning()) { // if not in route calc or already producing the route line
-				// if the route line is currently being produced stop it  
-				if (RouteLineProducer.isRunning()) {
-					RouteInstructions.abortRouteLineProduction();						
-				}
-				routeCalc = true;
-				if (Configuration.getContinueMapWhileRouteing() != Configuration.continueMap_Always ) {
-					stopImageCollector();
-				}
-				RouteInstructions.resetOffRoute(route, center);
-				// center of the map is the route source
-				RoutePositionMark routeSource = new RoutePositionMark(center.radlat, center.radlon);
-				logger.info("Routing source: " + routeSource);
-				routeEngine = new Routing(this);
-				routeEngine.solve(routeSource, dest);
-//					resume();
+			stopRouting(false);
+			endRouting();
+			
+			routingStarted = true;
+			routeCalc = true;
+			if (Configuration.getContinueMapWhileRouteing() != Configuration.continueMap_Always ) {
+				stopImageCollector();
 			}
+			RouteInstructions.resetOffRoute(route, center);
+			// center of the map is the route source
+			RoutePositionMark routeSource = new RoutePositionMark(center.radlat, center.radlon);
+			logger.info("Routing source: " + routeSource);
+			routeEngine = new Routing(this);
+			routeEngine.solve(routeSource, dest);
+//					resume();
 			routingsMenu = null; // refresh routingsMenu
 		} catch (Exception e) {
  			logger.exception(Locale.get("trace.InTraceCommandAction")/*In Trace.commandAction*/, e);
@@ -2199,11 +2203,10 @@ CompassReceiver, Runnable , GpsMidDisplayable, CompletionListener, IconActionPer
 	}
 
 	private void stopRouting(boolean showAlert) {
+				routingStarted = false;
 				NoiseMaker.stopPlayer();
-				if (routeCalc) {
-					if (routeEngine != null) {
-						routeEngine.cancelRouting();
-					}
+				if (routeEngine != null) {
+					routeEngine.cancelRouting();
 					if (showAlert) {
 						alert(Locale.get("trace.RouteCalculation")/*Route Calculation*/, Locale.get("trace.Cancelled")/*Cancelled*/, 1500);
 					}
@@ -2212,8 +2215,6 @@ CompassReceiver, Runnable , GpsMidDisplayable, CompletionListener, IconActionPer
 						alert(Locale.get("trace.Routing")/*Routing*/, Locale.get("generic.Off")/*Off*/, 750);
 					}
 				}
-				endRouting();
-				routingsMenu = null; // refresh routingsMenu
 				// redraw immediately
 				synchronized (this) {
 					if (imageCollector != null) {
@@ -2647,12 +2648,7 @@ CompassReceiver, Runnable , GpsMidDisplayable, CompletionListener, IconActionPer
 					if (movedAwayFromDest
 					    && Configuration.getCfgBitState(Configuration.CFGBIT_STOP_ROUTING_AT_DESTINATION)) {
 						// stop routing
-						if (routeCalc) {
-							if (routeEngine != null) {
-								routeEngine.cancelRouting();
-							}
-						}
-						endRouting();
+						commandAction(ROUTING_STOP_CMD);
 						// redraw immediately
 						synchronized (this) {
 							if (imageCollector != null) {
@@ -4730,6 +4726,7 @@ CompassReceiver, Runnable , GpsMidDisplayable, CompletionListener, IconActionPer
 	public void setDestination(RoutePositionMark dest) {
 		Routing.dropToConnectionsCache();
 		movedAwayFromDest = false;
+		setRoute(null);
 		endRouting();
 		this.dest = dest;
 		pc.dest = dest;
@@ -4756,9 +4753,12 @@ CompassReceiver, Runnable , GpsMidDisplayable, CompletionListener, IconActionPer
 		RouteInstructions.initialRecalcDone = false;
 		RouteInstructions.icCountOffRouteDetected = 0;
 		RouteInstructions.routeInstructionsHeight = 0;
-		RouteInstructions.abortRouteLineProduction();
-		setRoute(null);
+		// if the route line is currently being produced stop it  
+		if (RouteLineProducer.isRunning()) {
+			RouteInstructions.abortRouteLineProduction();
+		}
 		RouteConnectionTraces.clear();
+		routingStarted = false;
 	}
 	
 	/**
@@ -4766,6 +4766,7 @@ CompassReceiver, Runnable , GpsMidDisplayable, CompletionListener, IconActionPer
 	 * @param route
 	 */
 	public void setRoute(Vector route) {
+		routeCalc=false;
 		synchronized(this) {
 			this.route = route;
 		}
@@ -4773,19 +4774,20 @@ CompassReceiver, Runnable , GpsMidDisplayable, CompletionListener, IconActionPer
 			// reset off-route as soon as first route connection is known
 			RouteInstructions.resetOffRoute(this.route, center);
 
-			if (ri == null) {
-				ri = new RouteInstructions(this);
-			}
-			// show map during route line production
-			if (Configuration.getContinueMapWhileRouteing() == Configuration.continueMap_At_Route_Line_Creation) {
-				resumeImageCollectorAfterRouteCalc();
-			}
-			ri.newRoute(this.route);
-
 			if (routeEngine != null) {
+				if (ri == null) {
+					ri = new RouteInstructions(this);
+				}
+				// show map during route line production
+				if (Configuration.getContinueMapWhileRouteing() == Configuration.continueMap_At_Route_Line_Creation) {
+					resumeImageCollectorAfterRouteCalc();
+				}
+				ri.newRoute(this.route);
+
 				if (routeEngine.routeStartsAgainstMovingDirection) {
 					ri.forceAgainstDirection();
 				}
+				routeEngine = null;
 			} else {
 				alert("Warning", "routeEngine==null", 3000);
 			}
@@ -4793,8 +4795,6 @@ CompassReceiver, Runnable , GpsMidDisplayable, CompletionListener, IconActionPer
 		}
 		// show map always after route calculation
 		resumeImageCollectorAfterRouteCalc();
-		routeCalc=false;
-		routeEngine=null;
 	}
 
 	private void resumeImageCollectorAfterRouteCalc() {
@@ -4913,7 +4913,7 @@ CompassReceiver, Runnable , GpsMidDisplayable, CompletionListener, IconActionPer
 	public void performIconAction(int actionId, String choiceName) {
 		System.out.println("choiceName: " + choiceName);
 		if (!isShowingSplitScreen()) {
-			show();
+			show(); // Attention: e.g. GuiRoute relies on this
 		}
 		updateLastUserActionTime();
 		// when we are low on memory or during route calculation do not cache the icon menu (including scaled images)

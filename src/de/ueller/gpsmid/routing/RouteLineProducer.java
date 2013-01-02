@@ -351,6 +351,10 @@ public class RouteLineProducer implements Runnable {
 		//#debug debug
 		logger.debug("waitForRouteLine:" + i + ", maxRouteElement: " + maxRouteElementDone);
 		while (i >= maxRouteElementDone && !RouteLineProducer.abort) {
+			if (!isRunning()) {
+				//System.out.println("ERROR: Waiting for route line but RouteLineProducer is not running");
+				return;
+			}
 			synchronized (this) {
 				try {
 					notifyWhenAtElement = i;

@@ -1,3 +1,6 @@
+    *** Usability ***
+	- changing travel mode in the map screen will now trigger a route recalc if a route is currently displayed or calculated 
+    *** Others ***
     - reverted possibe bugfix for startup trace crash issue on Nokia E72 when not in full-screen mode
       and Gps activated and started at startup, as it didn't fix the bug.
 

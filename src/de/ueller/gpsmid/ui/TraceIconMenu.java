@@ -301,7 +301,8 @@ public class TraceIconMenu extends IconMenuWithPagesGui {
 				: Locale.get("traceiconmenu.Voice")/*Voice*/);
 		iconToggleAudioRec.setImageToggleState( !audioOn );
 		
-		boolean routeOn = (trace.route != null || trace.routeCalc);
+		//boolean routeOn = (trace.route != null || trace.routeCalc);
+		boolean routeOn = trace.routingStarted;
 		iconToggleRoute.setText( routeOn ? Locale.get("traceiconmenu.StopRoute")/*Stop Route*/ 
 				: Locale.get("traceiconmenu.Calc")/*Calculate*/);				
 		iconToggleRoute.setImageToggleState( !routeOn );

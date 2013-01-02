@@ -141,9 +141,7 @@ public class RouteInstructions {
 		againstDirectionDetectedTime = 0;
 		GpsMid.mNoiseMaker.resetSoundRepeatTimes();		
 		try {
-			if (rlp == null) {
-				rlp = new RouteLineProducer();
-			}
+			rlp = new RouteLineProducer();
 			rlp.determineRoutePath(trace, route);
 			createRouteInstructions();
 			outputRoutePath();

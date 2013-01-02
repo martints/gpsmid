@@ -49,7 +49,8 @@ public class Routing implements Runnable {
 	private final Trace parent;
 	private int bestTotal;
 	private long nextUpdate;
-	private static volatile boolean stopRouting = false;
+	private volatile boolean stopRouting = false;
+	private static volatile boolean calculating = false;
 	private float estimateFac = 1.40f;
 	/** maximum speed estimated in m/s */
 	private int maxEstimationSpeed;
@@ -135,10 +136,6 @@ public class Routing implements Runnable {
 				roadRun = false;
 			}
 		}
-		if (currentTravelMask != Configuration.getTravelMask()) {
-			dropToConnectionsCache();
-			currentTravelMask = Configuration.getTravelMask();
-		}
 		showRouteHelpers = Configuration.getCfgBitState(Configuration.CFGBIT_ROUTEHELPERS);
 		showConnectionTraces = Configuration.getCfgBitState(Configuration.CFGBIT_ROUTECONNECTION_TRACES);
 	}
@@ -150,6 +147,11 @@ public class Routing implements Runnable {
 		Vector children = new Vector();
 		searchStartTime = System.currentTimeMillis();
 		expanded=0;
+		
+		if (currentTravelMask != Configuration.getTravelMask()) {
+			dropToConnectionsCache();
+			currentTravelMask = Configuration.getTravelMask();
+		}
 		
 		boolean checkForTurnRestrictions =
 			Configuration.getCfgBitState(Configuration.CFGBIT_USE_TURN_RESTRICTIONS_FOR_ROUTE_CALCULATION) &&
@@ -217,11 +219,12 @@ public class Routing implements Runnable {
 				}
 			}
 
+			if (stopRouting) {
+				break; // cancel route calculation 1/2
+			}
 			if (!(currentNode.getTotal() == bestTotal)) {
-				if (setBest(currentNode.getTotal(),currentNode.costs)) {
-					break; // cancel route calculation 1/2
-				}
-			} 
+				setBest(currentNode.getTotal(),currentNode.costs);
+			}
 			if (currentNode.state.toId == dest.id) {
 				/* calculation statistics for debug purposes */
 //				parent.alert("Max values", "Nodes:" + maxNodesSize + " Open:" + maxOpenSize + " Closed:" + maxClosedSize + " OutOfMem: " + oomCounter, 10000);
@@ -524,7 +527,7 @@ public class Routing implements Runnable {
 			nodes.removeElementAt(0);
 			addToNodes(children); // update nodes
 		}
-		if (!Routing.stopRouting) {
+		if (!stopRouting) {
 			parent.receiveMessage(Locale.get("routing.NoSolutionFound")/*no Solution found*/);
 		}
 		return null;
@@ -535,15 +538,12 @@ public class Routing implements Runnable {
 	 * Update title bar during routing
 	 * @param total
 	 * @param actual
-	 * @return true if routing is canceled
 	 */
-	private boolean setBest(int total,int actual) {
+	private void setBest(int total,int actual) {
 		bestTotal=total;
 		long now=System.currentTimeMillis();
 		if (now > nextUpdate){
-		if (Routing.stopRouting) {
-			return true;
-		}
+
 		if (bestTime){
 			parent.receiveMessage("" + (bestTotal/600) 
 					      + Locale.get("routing.min")/*min*/ + " " + (100*actual/total)
@@ -557,7 +557,6 @@ public class Routing implements Runnable {
 		}
 		nextUpdate=now + 1000;
 		}
-		return false;
 	}
 
 	private void addToNodes(Vector children) {
@@ -738,7 +737,7 @@ public class Routing implements Runnable {
 
 	public void solve(RoutePositionMark fromMark,RoutePositionMark toMark) {
 		this.fromMark = fromMark;
-		this.toMark = toMark;
+		Routing.toMark = toMark;
 		
 		
 //#if polish.api.finland
@@ -1128,7 +1127,8 @@ public class Routing implements Runnable {
 */
 		
 		// create from and to connections
-		if (! prepareSolving()) {
+		if (stopRouting || ! prepareSolving()) {
+			parent.endRouting();
 			return null;
 		}		
 		
@@ -1139,7 +1139,7 @@ public class Routing implements Runnable {
 			closed.removeAll();
 			// cleanup the route tiles after searching the route
 			tile.cleanup(-1);
-			if (solution == null) {
+			if (solution == null || stopRouting) {
 				return null; // cancel route calculation 2/2
 			}
 			int seconds = (int) (System.currentTimeMillis() - searchStartTime) / 1000;
@@ -1257,7 +1257,6 @@ public class Routing implements Runnable {
 	
 	public void run() {
 		RouteInstructions.abortRouteLineProduction();
-		Routing.stopRouting = false;
 		
 		/* Wait for the route tile to be initialized by the DictReader thread
 		 * (This is necessary if trying to calculate a route very soon after midlet startup) 
@@ -1280,18 +1279,25 @@ public class Routing implements Runnable {
 		try {
 			//#debug error
 			logger.info("Starting routing thread");
+			/* Wait for previous route calculation to terminate (necessary when route calculation canceled and started again) 
+			*/
+			while (calculating) {
+				parent.alert("Route Calculation", "Waiting for previous routeEngine", 1000);
+				try {
+					Thread.sleep(250);
+				} catch (InterruptedException e1) {
+					// nothing to do in that case						
+				}
+			}
+
+			calculating = true;
 			Vector solve = solve();
-			parent.setRoute(solve);
-		} catch (NullPointerException npe) {
-			parent.setRoute(null);
-			parent.receiveMessage(npe.getMessage());
-			logger.fatal(Locale.get("routing.RoutingRhreadCrashedWith")/*Routing thread crashed unexpectedly with error */ +  npe.getMessage());			
-			npe.printStackTrace();
-			
+			if (!stopRouting) {
+				parent.setRoute(solve);
+			}			
 		} catch (Exception e) {
 			parent.setRoute(null);
 			parent.receiveMessage(e.getMessage());
-			//#debug error
 			logger.fatal(Locale.get("routing.RoutingRhreadCrashedWith")/*Routing thread crashed unexpectedly with error */ +  e.getMessage());
 			//#debug			
 			e.printStackTrace();
@@ -1300,6 +1306,7 @@ public class Routing implements Runnable {
 			parent.receiveMessage(e1.getMessage());
 			e1.printStackTrace();
 		}
+		calculating = false;
 		
 	} 
 
@@ -1313,7 +1320,7 @@ public class Routing implements Runnable {
 	}
 
 	public void cancelRouting() {
-		Routing.stopRouting = true;
+		stopRouting = true;
 		RouteInstructions.abortRouteLineProduction();
 	}
 
