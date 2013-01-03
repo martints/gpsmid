@@ -64,7 +64,7 @@ public class ScreenContext {
 		this.p = p;
 		float scale = p.getScale();
 		// Earth circumference / scale / pixel per meter
-		ppm = (40075016.6855784861531768177614f / scale / p.getPPM());
+		ppm = (40075016.6855784861531768177614f / scale / p.getPPM()) * Configuration.getDisplayDensityFactor();
 	}
 
 //	public boolean isVisible(float lat, float lon){

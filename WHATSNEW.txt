@@ -1,3 +1,5 @@
+	*** Android support ***
+	- respect Android display metrics for drawing ways accordingly wider on high density displays
     *** Usability ***
 	- changing travel mode in the map screen will now trigger a route recalc if a route is currently displayed or calculated 
     *** Others ***

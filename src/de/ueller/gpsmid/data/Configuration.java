@@ -22,6 +22,7 @@ import javax.microedition.io.file.FileConnection;
 //#endif
 //#if polish.android
 import de.enough.polish.android.midlet.MidletBridge;
+import android.util.DisplayMetrics;
 import android.content.res.AssetManager;
 import android.content.Context;
 import java.io.BufferedInputStream;
@@ -584,6 +585,7 @@ public class Configuration {
 	private static int altitudeCorrection = 0;
 	//#if polish.android
 	private static AssetManager assets = null;
+	private static float displayDensityFactor = 0.0f;
 	//#endif
 	
 	public static void read() {
@@ -2727,4 +2729,18 @@ public class Configuration {
 		// FIXME switch this based on pixels-per-inch value and/or make user-configurable
 		return 80;
 	}
+	
+	public static float getDisplayDensityFactor() {
+		//#if polish.android
+		if (displayDensityFactor < 0.0001f) {
+			DisplayMetrics metrics = new DisplayMetrics();
+			MidletBridge.getInstance().getWindowManager().getDefaultDisplay().getMetrics(metrics);
+			displayDensityFactor = metrics.density;
+		}
+		return displayDensityFactor;
+		//#else
+		return 1.0f;
+		//#endif
+	}
+	
 }
