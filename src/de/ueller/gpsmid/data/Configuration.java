@@ -975,7 +975,7 @@ public class Configuration {
 			setCfgBitSavedState(CFGBIT_COMPASS_DIRECTION, true);
 			setCfgBitSavedState(CFGBIT_COMPASS_AND_MOVEMENT_DIRECTION, true);
 			setCfgBitSavedState(CFGBIT_ICONMENUS_FULLSCREEN, false);
-			setCfgBitSavedState(CFGBIT_SEARCH_SHOW_NATIVE_KEYBOARD, true);
+			setCfgBitSavedState(CFGBIT_SEARCH_SHOW_NATIVE_KEYBOARD, false);
 			//#else
 			setCfgBitSavedState(CFGBIT_ICONMENUS_SETUP, getCfgBitState(CFGBIT_ICONMENUS));
 			//#endif
