@@ -492,7 +492,7 @@ CompassReceiver, Runnable , GpsMidDisplayable, CompletionListener, IconActionPer
 	*/
 	private static Font fontRouteIcon = null;
 	
-	public boolean manualRotationMode = false;
+	public int rotationMode = 0;
 	
 	public Vector locationUpdateListeners;
 	private Projection panProjection;
@@ -1272,7 +1272,7 @@ CompassReceiver, Runnable , GpsMidDisplayable, CompletionListener, IconActionPer
 				} else if (c == CMDS[PAN_LEFT2_CMD]) {
 					if (TrackPlayer.isPlaying) {
 						TrackPlayer.slower();
-					} else if (manualRotationMode) {
+					} else if (rotationMode == Configuration.ROTATION_MANUAL) {
 						courseDiff=-5;
 					} else {
 						panX = -2;
@@ -1281,7 +1281,7 @@ CompassReceiver, Runnable , GpsMidDisplayable, CompletionListener, IconActionPer
 				} else if (c == CMDS[PAN_RIGHT2_CMD]) {
 					if (TrackPlayer.isPlaying) {
 						TrackPlayer.faster();
-					} else if (manualRotationMode) {
+					} else if (rotationMode == Configuration.ROTATION_MANUAL) {
 						courseDiff=5;
 					} else {
 						panX = 2;
@@ -1746,16 +1746,24 @@ CompassReceiver, Runnable , GpsMidDisplayable, CompletionListener, IconActionPer
 				return;
 			}
 			if (c == CMDS[MANUAL_ROTATION_MODE_CMD]) {
-				manualRotationMode = !manualRotationMode;
-				if (manualRotationMode) {
-					if (hasPointerEvents()) {
-						alert(Locale.get("trace.ManualRotation")/*Manual Rotation*/, Locale.get("trace.ChangeCourse")/*Change course with zoom buttons*/, 3000);
-					} else {
-						alert(Locale.get("trace.ManualRotation")/*Manual Rotation*/, Locale.get("trace.ChangeCourseWithLeftRightKeys")/*Change course with left/right keys*/, 3000);
-					}
-				} else {
-					alert(Locale.get("trace.ManualRotation")/*Manual Rotation*/, Locale.get("generic.Off")/*Off*/, 750);
+				rotationMode++;
+				if (rotationMode == Configuration.ROTATION_COUNT) {
+					rotationMode = 0;
 				}
+				if (rotationMode == Configuration.ROTATION_MANUAL) {
+					if (hasPointerEvents()) {
+						alert(Locale.get("guidiscover.DirectionOptions")/*Direction Options*/, Locale.get("trace.ChangeCourse")/*Change course with zoom buttons*/, 3000);
+					} else {
+						alert(Locale.get("guidiscover.DirectionOptions")/*Direction Options*/, Locale.get("trace.ChangeCourseWithLeftRightKeys")/*Change course with left/right keys*/, 3000);
+					}
+				} else if (rotationMode == Configuration.ROTATION_MOVEMENT_DIRECTION) {
+					alert(Locale.get("guidiscover.DirectionOptions")/*Direction Options*/, Locale.get("guidiscover.movement"), 750);
+				} else if (rotationMode == Configuration.ROTATION_COMPASS_DIRECTION) {
+					alert(Locale.get("guidiscover.DirectionOptions")/*Direction Options*/, Locale.get("guidiscover.compass"), 750);
+				} else if (rotationMode == Configuration.ROTATION_COMPASS_AND_MOVEMENT_DIRECTION) {
+					alert(Locale.get("guidiscover.DirectionOptions")/*Direction Options*/, Locale.get("guidiscover.autocompass"), 750);
+				}
+				Configuration.setRotation(rotationMode, false);
 				return;
 			}
 			if (c == CMDS[TOGGLE_OVERLAY_CMD]) {
@@ -1820,7 +1828,7 @@ CompassReceiver, Runnable , GpsMidDisplayable, CompletionListener, IconActionPer
 				return;
 			}
 			if (c == CMDS[TOGGLE_MAP_PROJ_CMD]) {
-				if (manualRotationMode) {
+				if (rotationMode == Configuration.ROTATION_MANUAL) {
 					if (Configuration.getCfgBitState(Configuration.CFGBIT_COMPASS_DIRECTION) && compassProducer != null) {
 						compassDeviation = 0;
 					} else {
@@ -2322,6 +2330,7 @@ CompassReceiver, Runnable , GpsMidDisplayable, CompletionListener, IconActionPer
 		resetSize();
 		// resetSize() does this
 		// recreateTraceLayout();
+		rotationMode = Configuration.getRotationIndexFromCfgBits(true);
 	}
 
 	public void shutdown() {
@@ -4323,7 +4332,7 @@ CompassReceiver, Runnable , GpsMidDisplayable, CompletionListener, IconActionPer
 					} else if (actionId == ZOOM_OUT_CMD) {
 						actionId = PAN_LEFT2_CMD;
 					}
-				} else if (manualRotationMode) {
+				} else if (rotationMode == Configuration.ROTATION_MANUAL) {
 					if (actionId == ZOOM_IN_CMD) {
 						actionId = PAN_LEFT2_CMD;
 					} else if (actionId == ZOOM_OUT_CMD) {
@@ -5085,6 +5094,10 @@ CompassReceiver, Runnable , GpsMidDisplayable, CompletionListener, IconActionPer
 	    }
 	    GpsMid.getInstance().alert("GpsMid", Locale.get("trace.OnlineFeaturesDisabledIn") + " " + Locale.get("traceiconmenu.Setup") + " / " + Locale.get("guidiscovericonmenu.Online"), 5000); // Online features are disabled in Setup / Online 
 	    return false;
+    }
+    
+    public void setRotationMode(int index) {
+    	rotationMode = index;
     }
     
 }

@@ -1,3 +1,6 @@
+    *** Map Display ***
+	- Tapping compass direction on top of map screen rotates through rotation modes
+	 (Movement Direction, Compass, Autoswitch, Manual Rotation)  
 	*** Android support ***
 	- respect Android display metrics for drawing ways accordingly wider on high density displays
     *** Usability ***

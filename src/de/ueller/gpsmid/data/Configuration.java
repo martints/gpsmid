@@ -386,7 +386,8 @@ public class Configuration {
 	public final static short CFGBIT_DISABLE_AREAS_WHEN_BACKGROUND_MAP = 153;
 	/** bit 154: Disable buildings when background map is in use */
 	public final static short CFGBIT_DISABLE_BUILDINGS_WHEN_BACKGROUND_MAP = 154;
-	
+	/** bit 155: Rotate manually */
+	public final static short CFGBIT_MANUAL_ROTATION = 155;
 	/**
 	 * These are the database record IDs for each configuration option
 	 */
@@ -458,6 +459,14 @@ public class Configuration {
 	public final static int GPX_RECORD_ADAPTIVE = 0;
 	// User specified options define if a trackpoint is written
 	public final static int GPX_RECORD_MINIMUM_SECS_DIST = 1;
+
+	// Rotation modes used by e.g. Trace and GuiDiscover
+	public static final int ROTATION_MOVEMENT_DIRECTION = 0;
+	public static final int ROTATION_COMPASS_DIRECTION = 1; 
+	public static final int ROTATION_COMPASS_AND_MOVEMENT_DIRECTION = 2; 
+	public static final int ROTATION_MANUAL = 3; 
+	public static final int ROTATION_COUNT = 4; 
+	
 	
 	public static int KEYCODE_CAMERA_COVER_OPEN = -34;
 	public static int KEYCODE_CAMERA_COVER_CLOSE = -35;
@@ -2742,5 +2751,44 @@ public class Configuration {
 		return 1.0f;
 		//#endif
 	}
+
+	public static int getRotationIndexFromCfgBits(boolean saved) {
+		int index = ROTATION_MOVEMENT_DIRECTION;
+		if (getCfgBitState(CFGBIT_COMPASS_DIRECTION, saved)) {
+			index = ROTATION_COMPASS_DIRECTION;
+		}
+		if (getCfgBitState(CFGBIT_COMPASS_AND_MOVEMENT_DIRECTION, saved)) {
+			index = ROTATION_COMPASS_AND_MOVEMENT_DIRECTION;
+		}
+		if (getCfgBitState(CFGBIT_MANUAL_ROTATION, saved)) {
+			index = ROTATION_MANUAL;
+		}
+		return index;
+	}
+	
+	public static void setRotation(int index, boolean saved) {
+		if ((!getCfgBitState(CFGBIT_COMPASS_DIRECTION)) &&
+		    (index == ROTATION_COMPASS_DIRECTION || index == ROTATION_COMPASS_AND_MOVEMENT_DIRECTION)) {
+			setCfgBitState(CFGBIT_COMPASS_DIRECTION, true, saved);
+			Trace.getInstance().startCompass();
+		}
+		if (getCfgBitSavedState(CFGBIT_COMPASS_DIRECTION)
+		    && (index == ROTATION_MOVEMENT_DIRECTION || index == ROTATION_MANUAL) ) {
+			setCfgBitState(CFGBIT_COMPASS_DIRECTION, false, saved);
+			setCfgBitState(CFGBIT_COMPASS_AND_MOVEMENT_DIRECTION, false, saved);
+			Trace.getInstance().stopCompass();
+		}
+		if ((!getCfgBitState(CFGBIT_COMPASS_AND_MOVEMENT_DIRECTION))
+		    && index == ROTATION_COMPASS_AND_MOVEMENT_DIRECTION) {
+			setCfgBitState(CFGBIT_COMPASS_AND_MOVEMENT_DIRECTION,
+							  true, saved);
+		}
+		if (getCfgBitState(CFGBIT_COMPASS_AND_MOVEMENT_DIRECTION)
+		    && index != ROTATION_COMPASS_AND_MOVEMENT_DIRECTION) {
+			setCfgBitState(CFGBIT_COMPASS_AND_MOVEMENT_DIRECTION,
+							  false, saved);
+		}
+	}
+
 	
 }

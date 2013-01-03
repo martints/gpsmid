@@ -646,10 +646,11 @@ public class GuiDiscover implements CommandListener, ItemCommandListener,
 		//#style formItem
 		menuDisplayOptions.append(rotationGroup);
 
-		String [] direction = new String[3];
+		String [] direction = new String[4];
 		direction[0] = Locale.get("guidiscover.movement")/*by movement*/;
 		direction[1] = Locale.get("guidiscover.compass")/*by compass*/;
 		direction[2] = Locale.get("guidiscover.autocompass")/*autoswitch*/;
+		direction[3] = Locale.get("guidiscover.ManualRotation")/*manual*/;
 		directionOpts = new ChoiceGroup(Locale.get("guidiscover.DirectionOptions")/*Rotate map*/, Choice.EXCLUSIVE, direction, null);
 		//#style formItem
 		menuDisplayOptions.append(directionOpts);
@@ -1266,10 +1267,7 @@ public class GuiDiscover implements CommandListener, ItemCommandListener,
 				renderOpts.setSelectedIndex( Configuration.getCfgBitSavedState(Configuration.CFGBIT_STREETRENDERMODE) ? 1 : 0, true);
 				directionDevOpts.setSelectedIndex(0, Configuration.getCfgBitSavedState(Configuration.CFGBIT_COMPASS_AUTOCALIBRATE));
 				directionDevOpts.setSelectedIndex(1, Configuration.getCfgBitSavedState(Configuration.CFGBIT_COMPASS_ALWAYS_ROTATE));
-				directionOpts.setSelectedIndex( Configuration.getCfgBitSavedState(Configuration.CFGBIT_COMPASS_DIRECTION) ? 1 : 0, true);
-				if (Configuration.getCfgBitSavedState(Configuration.CFGBIT_COMPASS_AND_MOVEMENT_DIRECTION)) {
-					directionOpts.setSelectedIndex(2, true);
-				}
+				directionOpts.setSelectedIndex(Configuration.getRotationIndexFromCfgBits(true), true);
 				distanceViews.setSelectedIndex( Configuration.getCfgBitSavedState(Configuration.CFGBIT_DISTANCE_VIEW) ? 1 : 0, true);
 				sizeOpts.setSelectedIndex(0, Configuration.getCfgBitSavedState(Configuration.CFGBIT_POI_LABELS_LARGER));
 				sizeOpts.setSelectedIndex(1, Configuration.getCfgBitSavedState(Configuration.CFGBIT_WPT_LABELS_LARGER));
@@ -1674,28 +1672,9 @@ public class GuiDiscover implements CommandListener, ItemCommandListener,
 
 		Configuration.setProjTypeDefault( (byte) rotationGroup.getSelectedIndex() );
 
-		if ((!Configuration.getCfgBitSavedState(Configuration.CFGBIT_COMPASS_DIRECTION)) &&
-		    (directionOpts.getSelectedIndex() == 1 || directionOpts.getSelectedIndex() == 2)) {
-			Configuration.setCfgBitSavedState(Configuration.CFGBIT_COMPASS_DIRECTION, true);
-			Trace.getInstance().startCompass();
-		}
-		if (Configuration.getCfgBitSavedState(Configuration.CFGBIT_COMPASS_DIRECTION)
-		    && directionOpts.getSelectedIndex() == 0) {
-			Configuration.setCfgBitSavedState(Configuration.CFGBIT_COMPASS_DIRECTION, false);
-			Configuration.setCfgBitSavedState(Configuration.CFGBIT_COMPASS_AND_MOVEMENT_DIRECTION, false);
-			Trace.getInstance().stopCompass();
-		}
-
-		if ((!Configuration.getCfgBitSavedState(Configuration.CFGBIT_COMPASS_AND_MOVEMENT_DIRECTION))
-		    && directionOpts.getSelectedIndex() == 2) {
-			Configuration.setCfgBitSavedState(Configuration.CFGBIT_COMPASS_AND_MOVEMENT_DIRECTION,
-							  true);
-		}
-		if (Configuration.getCfgBitSavedState(Configuration.CFGBIT_COMPASS_AND_MOVEMENT_DIRECTION)
-		    && directionOpts.getSelectedIndex() != 2) {
-			Configuration.setCfgBitSavedState(Configuration.CFGBIT_COMPASS_AND_MOVEMENT_DIRECTION,
-							  false);
-		}
+		Configuration.setRotation(directionOpts.getSelectedIndex(), true);
+		Trace.getInstance().setRotationMode(directionOpts.getSelectedIndex());
+		
 		boolean calibrateOpts[] = new boolean[2];
 		directionDevOpts.getSelectedFlags(calibrateOpts);
 
