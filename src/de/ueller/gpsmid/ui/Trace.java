@@ -710,9 +710,11 @@ CompassReceiver, Runnable , GpsMidDisplayable, CompletionListener, IconActionPer
 					if (angleDiff((int) pinchZoomOrigAngle, (int) angle(event)) > 20) {
 						rotationStarted = true;
 						// on pinch rotate stop compass readings from rotating the map by setting manual rotationMode
-						oldRotationMode = rotationMode;
-						rotationMode = Configuration.ROTATION_MANUAL;
-						Configuration.setRotation(rotationMode, false);
+						if (oldRotationMode == - 1) {
+							oldRotationMode = rotationMode;
+							rotationMode = Configuration.ROTATION_MANUAL;
+							Configuration.setRotation(rotationMode, false);
+						}
 						// restore zoom at start of rotation gesture
 						// to avoid bug is 3450292 on some devices
 						mtPointerDragged(pinchZoomScale);
@@ -1888,10 +1890,7 @@ CompassReceiver, Runnable , GpsMidDisplayable, CompletionListener, IconActionPer
 				gpsRecenterInvalid = true;
 				gpsRecenterStale = true;
 				autoZoomed = true;
-				if (oldRotationMode != -1) {
-					Configuration.setRotation(oldRotationMode, false);
-					oldRotationMode = -1;
-				}
+				restoreRotationMode();
 				if (pos.latitude != 0.0f) {
 					receivePosition(pos);
 				}
@@ -3685,6 +3684,7 @@ CompassReceiver, Runnable , GpsMidDisplayable, CompletionListener, IconActionPer
 			&& isShown()
 		) {
 			gpsRecenter = true;
+			restoreRotationMode();
 			//autoZoomed = true;
 		}
 		if (Configuration.getLocationProvider() == Configuration.LOCATIONPROVIDER_JSR179) {
@@ -5111,6 +5111,14 @@ CompassReceiver, Runnable , GpsMidDisplayable, CompletionListener, IconActionPer
     
     public void setRotationMode(int index) {
     	rotationMode = index;
+    }
+
+    public void restoreRotationMode() {
+		if (oldRotationMode != -1) {
+			Configuration.setRotation(oldRotationMode, false);
+			rotationMode = oldRotationMode;
+			oldRotationMode = -1;
+		}
     }
     
 }
