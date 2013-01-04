@@ -493,6 +493,7 @@ CompassReceiver, Runnable , GpsMidDisplayable, CompletionListener, IconActionPer
 	private static Font fontRouteIcon = null;
 	
 	public int rotationMode = 0;
+	public int oldRotationMode = -1;
 	
 	public Vector locationUpdateListeners;
 	private Projection panProjection;
@@ -706,9 +707,12 @@ CompassReceiver, Runnable , GpsMidDisplayable, CompletionListener, IconActionPer
 				int mCount = event.getPointerCount();
 				// pinch zoom when at map screen but not in other screens
 				if (imageCollector != null && imageCollector.isRunning() && mCount > 1 && mtPointerId != INVALID_POINTER_ID) {
-					// possible FIXME should we skip this if we're getting compass readings?
 					if (angleDiff((int) pinchZoomOrigAngle, (int) angle(event)) > 20) {
 						rotationStarted = true;
+						// on pinch rotate stop compass readings from rotating the map by setting manual rotationMode
+						oldRotationMode = rotationMode;
+						rotationMode = Configuration.ROTATION_MANUAL;
+						Configuration.setRotation(rotationMode, false);
 						// restore zoom at start of rotation gesture
 						// to avoid bug is 3450292 on some devices
 						mtPointerDragged(pinchZoomScale);
@@ -1884,6 +1888,10 @@ CompassReceiver, Runnable , GpsMidDisplayable, CompletionListener, IconActionPer
 				gpsRecenterInvalid = true;
 				gpsRecenterStale = true;
 				autoZoomed = true;
+				if (oldRotationMode != -1) {
+					Configuration.setRotation(oldRotationMode, false);
+					oldRotationMode = -1;
+				}
 				if (pos.latitude != 0.0f) {
 					receivePosition(pos);
 				}
@@ -3616,6 +3624,11 @@ CompassReceiver, Runnable , GpsMidDisplayable, CompletionListener, IconActionPer
 	}
 	
 	public void updateCourse(int newcourse) {
+	    // if user is manually rotating the map don't set its course
+	    if (rotationMode == Configuration.ROTATION_MANUAL) {
+			return;
+		}
+		
 		coursegps = newcourse;
 		/*  don't rotate too fast
 		 */
