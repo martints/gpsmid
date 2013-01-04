@@ -2772,7 +2772,7 @@ public class Configuration {
 			setCfgBitState(CFGBIT_COMPASS_DIRECTION, true, saved);
 			Trace.getInstance().startCompass();
 		}
-		if (getCfgBitSavedState(CFGBIT_COMPASS_DIRECTION)
+		if (getCfgBitState(CFGBIT_COMPASS_DIRECTION)
 		    && (index == ROTATION_MOVEMENT_DIRECTION || index == ROTATION_MANUAL) ) {
 			setCfgBitState(CFGBIT_COMPASS_DIRECTION, false, saved);
 			setCfgBitState(CFGBIT_COMPASS_AND_MOVEMENT_DIRECTION, false, saved);
@@ -2788,6 +2788,9 @@ public class Configuration {
 			setCfgBitState(CFGBIT_COMPASS_AND_MOVEMENT_DIRECTION,
 							  false, saved);
 		}
+		
+		setCfgBitState(CFGBIT_MANUAL_ROTATION, index == ROTATION_MANUAL, saved);
+
 	}
 
 	
