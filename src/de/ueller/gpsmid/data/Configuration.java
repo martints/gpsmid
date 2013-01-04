@@ -981,8 +981,8 @@ public class Configuration {
 			setCfgBitSavedState(CFGBIT_COMPASS_ALWAYS_ROTATE, true);
 			setCfgBitSavedState(CFGBIT_CLICKABLE_MAPOBJECTS, true);
 			setCfgBitSavedState(CFGBIT_SHOW_ACCURACY, true);
-			setCfgBitSavedState(CFGBIT_COMPASS_DIRECTION, true);
-			setCfgBitSavedState(CFGBIT_COMPASS_AND_MOVEMENT_DIRECTION, true);
+			setCfgBitSavedState(CFGBIT_COMPASS_DIRECTION, false);
+			setCfgBitSavedState(CFGBIT_COMPASS_AND_MOVEMENT_DIRECTION, false);
 			setCfgBitSavedState(CFGBIT_ICONMENUS_FULLSCREEN, false);
 			setCfgBitSavedState(CFGBIT_SEARCH_SHOW_NATIVE_KEYBOARD, false);
 			//#else
