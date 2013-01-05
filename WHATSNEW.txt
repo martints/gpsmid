@@ -3,7 +3,8 @@
 	 (Movement Direction, Compass, Autoswitch, Manual Rotation)
 	- On pinch rotate set manual rotation mode to stop compass readings from rotating the map
 	  (can be restored to previous rotation mode by tapping "|" or pressing 5,
-	  also will be restored to previous rotation mode after auto gps recenter time from Display Options)  
+	  also will be restored to previous rotation mode after auto gps recenter time from Display Options)
+	- when "rotate always" is activated in display settings and map rotation is by compass  the map is now rotated even when it is not gps centered 
 	*** Android support ***
 	- respect Android display metrics for drawing ways accordingly wider on high density displays
     *** Usability ***

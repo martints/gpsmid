@@ -3600,8 +3600,10 @@ CompassReceiver, Runnable , GpsMidDisplayable, CompletionListener, IconActionPer
 		//	course = compassDeviated;
 		//}
 		if (Configuration.getCfgBitState(Configuration.CFGBIT_COMPASS_ALWAYS_ROTATE)
-		    // if user is panning the map, don't rotate by compass
-		    && gpsRecenter
+//		    if user is panning the map, don't rotate by compass
+//		    && gpsRecenter
+		    // rotate by compass only in compass mode or autoswitch mode
+		    && (rotationMode == Configuration.ROTATION_COMPASS_DIRECTION || rotationMode == Configuration.ROTATION_COMPASS_AND_MOVEMENT_DIRECTION) 
 		    // if we have autoswitch, rotate by compass only when movement course is not valid
 		    && !(Configuration.getCfgBitState(Configuration.CFGBIT_COMPASS_AND_MOVEMENT_DIRECTION)
 			&& (fspeed >= courseMinSpeed && thirdPrevCourse != -1))) {
