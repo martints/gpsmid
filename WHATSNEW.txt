@@ -11,6 +11,7 @@
     - The point of compass is shown in different colors depending on rotation mode
 	*** Android support ***
 	- respect Android display metrics for drawing ways accordingly wider on high density displays
+	- speed up external zip file reading, also improving external bundled map performance (credits to fork ShareNav)
     *** Usability ***
 	- changing travel mode in the map screen will now trigger a route recalc if a route is currently displayed or calculated 
     *** Others ***
