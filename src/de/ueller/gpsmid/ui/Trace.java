@@ -271,7 +271,6 @@ CompassReceiver, Runnable , GpsMidDisplayable, CompletionListener, IconActionPer
 	 */
 	public boolean pointerDown = false;
 	
-	private volatile boolean currentLayoutIsPortrait = true;
 	private volatile int previousAngle = 0;
 	private volatile int currentRotation = 0;
 
@@ -835,7 +834,6 @@ CompassReceiver, Runnable , GpsMidDisplayable, CompletionListener, IconActionPer
 			Configuration.setCfgBitSavedState(Configuration.CFGBIT_GPS_CONNECTED, true);
 			currentRotation = getAndroidRotationAngle();
 			//#endif
-			currentLayoutIsPortrait = deviceLayoutIsPortrait();
 			//#if polish.android
 			previousAngle = getAndroidRotationAngle();
 			//#else
@@ -2481,7 +2479,6 @@ CompassReceiver, Runnable , GpsMidDisplayable, CompletionListener, IconActionPer
 		//#endif
 
 		if (newAngle != previousAngle) {
-			currentLayoutIsPortrait = deviceLayoutIsPortrait();
 			compassDeviation += (newAngle - previousAngle);
 			if (compassDeviation < 0) {
 				compassDeviation += 360;
