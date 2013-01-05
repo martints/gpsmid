@@ -8,6 +8,7 @@
 	<color of="titleBar_background" is="00FFFFFF" isAtNight="00222222"/>
 	<color of="titleBar_text" is="00000000" isAtNight="00FFFFFF"/>
 	<color of="solution_background" is="00FFFFFF" isAtNight="00777777"/>
+	<color of="solution_deviate_compass_background" is="0029962F"/>	
 	<color of="solution_text" is="00000000" isAtNight="00FFFFFF"/>
 	<color of="altitude_background" is="00FFFFFF" isAtNight="00777777"/>
 	<color of="altitude_text" is="00000000" isAtNight="00FFFFFF"/>
@@ -34,7 +35,10 @@
 	<color of="zoom_button" is="00000000" isAtNight="00FFFFFF"/>
 	<color of="zoom_text" is="00000000" isAtNight="00FFFFFF" />
 	<color of="compass_direction_background" is="00FFFFC0" isAtNight="00000000"/>
-	<color of="compass_direction_text" is="00000000" isAtNight="00FFFFFF"/>
+	<color of="compass_direction_compass_background" is="0029962F"/>
+	<color of="compass_direction_compass_and_movement_background" is="00DBFFBD"/>
+	<color of="compass_direction_manual_background" is="00FFFFFF"/>
+	<color of="compass_direction_text" is="00000000" isAtNight="00CCCCCC"/>
 	<color of="speeding_sign_border" is="00FF0000"/>
 	<color of="speeding_sign_inner" is="00FFFFFF"/>
 	<color of="speeding_sign_text" is="00000000"/>

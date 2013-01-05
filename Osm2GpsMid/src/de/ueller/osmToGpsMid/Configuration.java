@@ -153,7 +153,11 @@ public class Configuration {
 	public final static int COLOR_MENU_TEXT = 86;
 	public final static int COLOR_ALTITUDE_BACKGROUND = 87;
 	public final static int COLOR_ALTITUDE_TEXT = 88;
-	public final static int COLOR_COUNT = 89;
+	public final static int COLOR_COMPASS_DIRECTION_COMPASS_BACKGROUND = 89;
+	public final static int COLOR_COMPASS_DIRECTION_COMPASS_AND_MOVEMENT_BACKGROUND = 90;
+	public final static int COLOR_COMPASS_DIRECTION_MANUAL_BACKGROUND = 91;
+	public final static int COLOR_SOLUTION_DEVIATE_COMPASS_BACKGROUND = 92;
+	public static int COLOR_COUNT = 93;
 	
 	public final static String COLORNAMES[] =
 			{"map_background",
@@ -244,7 +248,11 @@ public class Configuration {
 			 "menu_background",
 			 "menu_text",
 			 "altitude_background",
-			 "altitude_text"
+			 "altitude_text",
+			 "compass_direction_compass_background",
+			 "compass_direction_compass_and_movement_background",
+			 "compass_direction_manual_background",
+			 "solution_deviate_compass_background"
 			};
 
 	public static int COLORS[] = new int[COLOR_COUNT];

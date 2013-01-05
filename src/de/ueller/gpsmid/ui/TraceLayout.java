@@ -180,7 +180,7 @@ public class TraceLayout extends LayoutManager {
 		e.setBackgroundColor(Legend.COLORS[Legend.COLOR_SOLUTION_BACKGROUND]);
 		e.setAdditionalOffsX(-1);
 		e.setVRelative(ele[TITLEBAR]);
-		e.setActionID((Trace.TOGGLE_GPS_CMD << 16) + (Trace.CELLID_LOCATION_CMD << 8));
+		e.setActionID(Trace.TOGGLE_ADJUST_COMPASS_DEVIATION + (Trace.CELLID_LOCATION_CMD << 8) + (Trace.TOGGLE_GPS_CMD << 16));
 
 		e = ele[ALTITUDE]; addElement(e,
 				LayoutElement.FLAG_HALIGN_LEFTTO_RELATIVE | LayoutElement.FLAG_VALIGN_BELOW_RELATIVE |

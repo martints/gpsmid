@@ -212,8 +212,9 @@ CompassReceiver, Runnable , GpsMidDisplayable, CompletionListener, IconActionPer
 	protected static final int ROUTING_START_WITH_OPTIONAL_MODE_SELECT_CMD = 74;
 	protected static final int OPEN_MAP_CREDIT_URL = 75;
 	protected static final int SAVE_ROUTE_AS_GPX = 76;
+	protected static final int TOGGLE_ADJUST_COMPASS_DEVIATION = 77;
 
-	private final Command [] CMDS = new Command[77];
+	private final Command [] CMDS = new Command[78];
 
 	public static final int DATASCREEN_NONE = 0;
 	public static final int DATASCREEN_TACHO = 1;
@@ -492,8 +493,10 @@ CompassReceiver, Runnable , GpsMidDisplayable, CompletionListener, IconActionPer
 	*/
 	private static Font fontRouteIcon = null;
 	
-	public int rotationMode = 0;
-	public int oldRotationMode = -1;
+	public volatile int rotationMode = 0;
+	public volatile int oldRotationMode = -1;
+	private volatile boolean manualCompassDeviation = false;
+	private volatile long manualCompassDeviationStartTime = 0;
 	
 	public Vector locationUpdateListeners;
 	private Projection panProjection;
@@ -710,7 +713,7 @@ CompassReceiver, Runnable , GpsMidDisplayable, CompletionListener, IconActionPer
 					if (angleDiff((int) pinchZoomOrigAngle, (int) angle(event)) > 20) {
 						rotationStarted = true;
 						// on pinch rotate stop compass readings from rotating the map by setting manual rotationMode
-						if (oldRotationMode == - 1) {
+						if (oldRotationMode == - 1 && !manualCompassDeviation) {
 							oldRotationMode = rotationMode;
 							rotationMode = Configuration.ROTATION_MANUAL;
 							Configuration.setRotation(rotationMode, false);
@@ -1278,7 +1281,7 @@ CompassReceiver, Runnable , GpsMidDisplayable, CompletionListener, IconActionPer
 				} else if (c == CMDS[PAN_LEFT2_CMD]) {
 					if (TrackPlayer.isPlaying) {
 						TrackPlayer.slower();
-					} else if (rotationMode == Configuration.ROTATION_MANUAL) {
+					} else if (rotationMode == Configuration.ROTATION_MANUAL || manualCompassDeviation) {
 						courseDiff=-5;
 					} else {
 						panX = -2;
@@ -1287,7 +1290,7 @@ CompassReceiver, Runnable , GpsMidDisplayable, CompletionListener, IconActionPer
 				} else if (c == CMDS[PAN_RIGHT2_CMD]) {
 					if (TrackPlayer.isPlaying) {
 						TrackPlayer.faster();
-					} else if (rotationMode == Configuration.ROTATION_MANUAL) {
+					} else if (rotationMode == Configuration.ROTATION_MANUAL || manualCompassDeviation) {
 						courseDiff=5;
 					} else {
 						panX = 2;
@@ -1306,7 +1309,7 @@ CompassReceiver, Runnable , GpsMidDisplayable, CompletionListener, IconActionPer
 						panY = 2;
 					}
 				}
-				
+								
 				if (backLightLevelIndexDiff !=0  &&  System.currentTimeMillis() < (lastBackLightOnTime + 5000)) {
 					// turn backlight always on when dimming
 					Configuration.setCfgBitState(Configuration.CFGBIT_BACKLIGHT_ON, true, false);
@@ -1314,7 +1317,7 @@ CompassReceiver, Runnable , GpsMidDisplayable, CompletionListener, IconActionPer
 					Configuration.addToBackLightLevel(backLightLevelIndexDiff);
 					parent.showBackLightLevel();
 				} else if (imageCollector != null) {
-					if (Configuration.getCfgBitState(Configuration.CFGBIT_COMPASS_DIRECTION) && compassProducer != null) {
+					if (manualCompassDeviation && compassProducer != null) {
 						// set compass compassDeviation
 						if (compassDeviation == 360) {
 							compassDeviation = 0;
@@ -1324,7 +1327,7 @@ CompassReceiver, Runnable , GpsMidDisplayable, CompletionListener, IconActionPer
 							if (compassDeviation < 0) {
 								compassDeviation += 360;
 							}
-							deviateCompass();
+							deviateCompass(false);
 							course = compassDeviated;
 							updatePosition();
 						}
@@ -1428,6 +1431,21 @@ CompassReceiver, Runnable , GpsMidDisplayable, CompletionListener, IconActionPer
 					commandAction(DISCONNECT_GPS_CMD);
 				} else {
 					commandAction(CONNECT_GPS_CMD);					
+				}
+				return;
+			}
+			
+			if (c == CMDS[TOGGLE_ADJUST_COMPASS_DEVIATION]) {
+				if (compassProducer != null) {
+					if (manualCompassDeviation) {
+						alert(Locale.get("trace.SetCompassDeviation")/*CompassDeviation*/, Locale.get("generic.Off")/*Off*/, 3000);					
+					} else {
+						alert(Locale.get("trace.SetCompassDeviation")/*CompassDeviation*/, Locale.get("trace.ChangeCourse")/*Change course with zoom buttons*/, 3000);
+					}
+					manualCompassDeviation = !manualCompassDeviation;
+					manualCompassDeviationStartTime = System.currentTimeMillis();
+				} else {
+					alert(Locale.get("trace.SetCompassDeviation")/*CompassDeviation*/, Locale.get("trace.SetMapToCompassDirection")/*Set map first to rotate in Compass or Autoswitch direction*/, 3000);
 				}
 				return;
 			}
@@ -1752,10 +1770,18 @@ CompassReceiver, Runnable , GpsMidDisplayable, CompletionListener, IconActionPer
 				return;
 			}
 			if (c == CMDS[MANUAL_ROTATION_MODE_CMD]) {
-				rotationMode++;
-				if (rotationMode == Configuration.ROTATION_COUNT) {
-					rotationMode = 0;
-				}
+				//#if polish.android
+					rotationMode++;
+					if (rotationMode == Configuration.ROTATION_COUNT) {
+						rotationMode = 0;
+					}
+				//#else
+					if (rotationMode == Configuration.ROTATION_MANUAL) {
+						rotationMode = Configuration.ROTATION_MOVEMENT_DIRECTION;
+					} else {
+						rotationMode = Configuration.ROTATION_MANUAL;
+					}
+				//#endif
 				if (rotationMode == Configuration.ROTATION_MANUAL) {
 					if (hasPointerEvents()) {
 						alert(Locale.get("guidiscover.DirectionOptions")/*Direction Options*/, Locale.get("trace.ChangeCourse")/*Change course with zoom buttons*/, 3000);
@@ -1770,6 +1796,9 @@ CompassReceiver, Runnable , GpsMidDisplayable, CompletionListener, IconActionPer
 					alert(Locale.get("guidiscover.DirectionOptions")/*Direction Options*/, Locale.get("guidiscover.autocompass"), 750);
 				}
 				Configuration.setRotation(rotationMode, false);
+				if (rotationMode != Configuration.ROTATION_MANUAL) {
+					oldRotationMode = -1;
+				}
 				return;
 			}
 			if (c == CMDS[TOGGLE_OVERLAY_CMD]) {
@@ -2597,6 +2626,32 @@ CompassReceiver, Runnable , GpsMidDisplayable, CompletionListener, IconActionPer
 		if (!Legend.isValid) {
 			commandAction(SETUP_CMD);
 		}
+		
+		int colorNr;
+		if (manualCompassDeviation) {
+			colorNr = Legend.COLOR_SOLUTION_DEVIATE_COMPASS_BACKGROUND;
+			manualCompassDeviation = (System.currentTimeMillis() - manualCompassDeviationStartTime < 10000);
+		} else {
+			colorNr = Legend.COLOR_SOLUTION_BACKGROUND;
+		}
+		tl.ele[TraceLayout.SOLUTION].setBackgroundColor( Legend.COLORS[colorNr] );
+
+		switch (rotationMode) {
+			case Configuration.ROTATION_MOVEMENT_DIRECTION:
+				colorNr = Legend.COLOR_COMPASS_DIRECTION_BACKGROUND;
+				break;
+			case Configuration.ROTATION_COMPASS_DIRECTION:
+				colorNr = Legend.COLOR_COMPASS_DIRECTION_COMPASS_BACKGROUND;
+				break;
+			case Configuration.ROTATION_COMPASS_AND_MOVEMENT_DIRECTION:
+				colorNr = Legend.COLOR_COMPASS_DIRECTION_COMPASS_AND_MOVEMENT_BACKGROUND;
+				break;
+			case Configuration.ROTATION_MANUAL:
+				colorNr = Legend.COLOR_COMPASS_DIRECTION_MANUAL_BACKGROUND;
+				break;
+		}
+		tl.ele[TraceLayout.POINT_OF_COMPASS].setBackgroundColor( Legend.COLORS[colorNr] );
+		
 		try {
 			int yc = 1;
 			int la = 18;
@@ -3580,15 +3635,19 @@ CompassReceiver, Runnable , GpsMidDisplayable, CompletionListener, IconActionPer
 	public synchronized void receiveCompassStatus(int status) {
 	}
 
-	public void deviateCompass() {
+	public void deviateCompass(boolean silent) {
 		compassDeviated = (compassDirection + compassDeviation + 360) % 360;
+		if (!silent) {
+			receiveMessage(Locale.get("trace.CompassDeviation")/*Compass Deviation*/ + ": " + compassDeviation);
+		    manualCompassDeviationStartTime = System.currentTimeMillis();
+		}
 	}
 
 	public synchronized void receiveCompass(float direction) {
 		//#debug debug
 		logger.debug("Got compass reading: " + direction);
 		compassDirection = (int) direction;
-		deviateCompass();
+		deviateCompass(true);
 		// TODO: allow for user to use compass for turning the map in panning mode
 		// (gpsRenter test below switchable by user setting)
 		//if (Configuration.getCfgBitState(Configuration.CFGBIT_COMPASS_DIRECTION) && compassProducer != null && gpsRecenter) {
@@ -3711,7 +3770,7 @@ CompassReceiver, Runnable , GpsMidDisplayable, CompletionListener, IconActionPer
 			speed = (int) (pos.speed * 3.6f);
 			fspeed = pos.speed * 3.6f;
 			if (Configuration.getCfgBitState(Configuration.CFGBIT_COMPASS_DIRECTION) && compassProducer != null) {
-				deviateCompass();
+				deviateCompass(true);
 			}
 			// auto-fallback mode where course is from GPS at high speeds and from compass
 			// at low speeds
@@ -3732,7 +3791,7 @@ CompassReceiver, Runnable , GpsMidDisplayable, CompletionListener, IconActionPer
 				       // check for compass deviation auto-update, do it if set
 				       if (Configuration.getCfgBitState(Configuration.CFGBIT_COMPASS_AUTOCALIBRATE)) {
 					       compassDeviation = (int) pos.course - compassDirection;
-					       deviateCompass();
+					       deviateCompass(true);
 				       }
                                } else if (prevCourse == -1) {
 				       if (Configuration.getCfgBitState(Configuration.CFGBIT_COMPASS_AND_MOVEMENT_DIRECTION)) {
@@ -4147,6 +4206,10 @@ CompassReceiver, Runnable , GpsMidDisplayable, CompletionListener, IconActionPer
 	}
 	public void mtPointerRotated (float newangle) {
 		course = (int) newangle;
+		if (manualCompassDeviation) {
+			compassDeviation = course - compassDirection;
+		    deviateCompass(false);
+		}	 
 		updateLastUserActionTime();
 		updatePosition();
 		repaint();
@@ -4347,7 +4410,7 @@ CompassReceiver, Runnable , GpsMidDisplayable, CompletionListener, IconActionPer
 					} else if (actionId == ZOOM_OUT_CMD) {
 						actionId = PAN_LEFT2_CMD;
 					}
-				} else if (rotationMode == Configuration.ROTATION_MANUAL) {
+				} else if (rotationMode == Configuration.ROTATION_MANUAL || manualCompassDeviation) {
 					if (actionId == ZOOM_IN_CMD) {
 						actionId = PAN_LEFT2_CMD;
 					} else if (actionId == ZOOM_OUT_CMD) {

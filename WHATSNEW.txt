@@ -1,16 +1,20 @@
-    *** Map Display ***
-	- Tapping compass direction on top of map screen rotates through rotation modes
+    *** Rotation and Digital Compass Handling ***
+	- On Android, tapping compass direction on top of map screen rotates through rotation modes
 	 (Movement Direction, Compass, Autoswitch, Manual Rotation)
-	- On pinch rotate set manual rotation mode to stop compass readings from rotating the map
+	- On pinch rotate set manual rotation mode to stop compass from rotating the map
 	  (can be restored to previous rotation mode by tapping "|" or pressing 5,
 	  also will be restored to previous rotation mode after auto gps recenter time from Display Options)
-	- when "rotate always" is activated in display settings and map rotation is by compass  the map is now rotated even when it is not gps centered 
+	- when "rotate always" is activated in display settings and map rotation is by compass
+      the map is now rotated even when it is not gps centered
+    - Setting compass deviation by manually rotating the map is now toggled by tapping the GPS solution
+      (this mode times out after 7 seconds no more adjusting the compass deviation)
+    - The point of compass is shown in different colors depending on rotation mode
 	*** Android support ***
 	- respect Android display metrics for drawing ways accordingly wider on high density displays
     *** Usability ***
 	- changing travel mode in the map screen will now trigger a route recalc if a route is currently displayed or calculated 
     *** Others ***
-    - reverted possibe bugfix for startup trace crash issue on Nokia E72 when not in full-screen mode
+    - reverted possible bugfix for startup trace crash issue on Nokia E72 when not in full-screen mode
       and Gps activated and started at startup, as it didn't fix the bug.
 
 GpsMid 0.8.2

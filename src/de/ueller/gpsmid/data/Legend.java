@@ -198,7 +198,11 @@ public class Legend {
 	public final static int COLOR_MENU_TEXT = 86;
 	public final static int COLOR_ALTITUDE_BACKGROUND = 87;
 	public final static int COLOR_ALTITUDE_TEXT = 88;
-	public static int COLOR_COUNT = 89;
+	public final static int COLOR_COMPASS_DIRECTION_COMPASS_BACKGROUND = 89;
+	public final static int COLOR_COMPASS_DIRECTION_COMPASS_AND_MOVEMENT_BACKGROUND = 90;
+	public final static int COLOR_COMPASS_DIRECTION_MANUAL_BACKGROUND = 91;
+	public final static int COLOR_SOLUTION_DEVIATE_COMPASS_BACKGROUND = 92;
+	public static int COLOR_COUNT = 93;
 	
 	public static int COLORS[] = new int[COLOR_COUNT];
 	
@@ -415,8 +419,17 @@ public class Legend {
 		 */
 		int count = ds.readShort();
 
+
 		if (mapFormatVersion < 67) {
 			COLOR_COUNT = 87;
+			COLORS[COLOR_ALTITUDE_BACKGROUND] = COLORS[COLOR_SOLUTION_BACKGROUND];
+			COLORS[COLOR_ALTITUDE_TEXT] = COLORS[COLOR_SOLUTION_TEXT];
+		} else if (mapFormatVersion < 73) {
+			COLOR_COUNT = 89;
+			COLORS[COLOR_COMPASS_DIRECTION_COMPASS_BACKGROUND] = 0x0029962F;
+			COLORS[COLOR_COMPASS_DIRECTION_COMPASS_AND_MOVEMENT_BACKGROUND] = 0x00DBFFBD;
+			COLORS[COLOR_COMPASS_DIRECTION_MANUAL_BACKGROUND] = 0x00FFFFFF;
+			COLORS[COLOR_SOLUTION_DEVIATE_COMPASS_BACKGROUND] = 0x0029962F;
 		}
 
 		if (count != COLOR_COUNT) {
@@ -425,11 +438,7 @@ public class Legend {
 		for (int i = 0; i < COLOR_COUNT; i++) {
 			COLORS[i] = readDayOrNightColor(ds);
 		}
-		
-		if (mapFormatVersion < 67) {
-			COLORS[COLOR_ALTITUDE_BACKGROUND] = COLORS[COLOR_SOLUTION_BACKGROUND];
-			COLORS[COLOR_ALTITUDE_TEXT] = COLORS[COLOR_SOLUTION_TEXT];
-		}
+	
 
 		/*
 		 * Read Tile Scale Levels
