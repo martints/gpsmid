@@ -625,6 +625,8 @@ CompassReceiver, Runnable , GpsMidDisplayable, CompletionListener, IconActionPer
 		CMDS[TOGGLE_UNUSEABLEWAYS_DARKER] = new Command(Locale.get("trace.ToggleUnuseableWaysDarker")/*Toggle unuseable ways darker */, Command.ITEM, 100);
 		CMDS[OPEN_MAP_CREDIT_URL] = new Command(Locale.get("trace.showmapcredit")/*Show map credit/license webpage*/, Command.ITEM, 100);
 		CMDS[SAVE_ROUTE_AS_GPX] = new Command(Locale.get("traceiconmenu.SaveRouteGpx")/*Save route as GPX*/, Command.ITEM, 100);
+		CMDS[NORTH_UP_CMD] = new Command(Locale.get("projfactory.NorthUp")/*North Up*/, Command.ITEM, 100);
+		CMDS[TOGGLE_ADJUST_COMPASS_DEVIATION] = new Command(Locale.get("trace.SetCompassDeviation")/*Set Compass Deviation*/, Command.ITEM, 100);
 
 		addAllCommands();
 		
