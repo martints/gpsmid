@@ -3,6 +3,5 @@
 	<classpathentry kind="src" path="src"/>
 	<classpathentry kind="src" path="GpsMidGraph"/>
 	<classpathentry kind="con" path="J2MELIB"/>
-	<classpathentry kind="lib" path="C:/Program Files (x86)/Android/android-sdk/tools/lib"/>
 	<classpathentry kind="output" path="bin/classes"/>
 </classpath>
