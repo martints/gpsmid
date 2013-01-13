@@ -2248,14 +2248,15 @@ CompassReceiver, Runnable , GpsMidDisplayable, CompletionListener, IconActionPer
 
 	private void stopRouting(boolean showAlert) {
 				routingStarted = false;
-				NoiseMaker.stopPlayer();
 				if (routeEngine != null) {
 					routeEngine.cancelRouting();
 					if (showAlert) {
+						NoiseMaker.stopPlayer();
 						alert(Locale.get("trace.RouteCalculation")/*Route Calculation*/, Locale.get("trace.Cancelled")/*Cancelled*/, 1500);
 					}
 				} else {
 					if (showAlert) {
+						NoiseMaker.stopPlayer();
 						alert(Locale.get("trace.Routing")/*Routing*/, Locale.get("generic.Off")/*Off*/, 750);
 					}
 				}
