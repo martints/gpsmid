@@ -114,10 +114,13 @@ public class GuiWaypoint extends /*GuiCustom*/List implements CommandListener,
 		// save total waypoints
 		int count_waypoints = mWaypoints.size();
 		
+		//#if polish.android
+		//#else
 		// Limit display of Waypoints to 255 because some Phones can only display 255 listitems
 		if (count_waypoints > 255) {
 			count_waypoints = 255;
 		}
+		//#endif
 		for (int i = 0; i < count_waypoints; i++) {
 			if ((getWaypoint(i).displayName == null) || (getWaypoint(i).displayName.equals(""))) {
 				//#style listItem
@@ -378,6 +381,8 @@ public class GuiWaypoint extends /*GuiCustom*/List implements CommandListener,
 		
 			GpsMid.getInstance().show(this);
 
+			//#if polish.android
+			//#else
 			// Show Alert to inform the user right before showing the waypoints
 			// (because the J2ME List class can not display more than
 			// 255 items - at least on some phones).
@@ -389,6 +394,7 @@ public class GuiWaypoint extends /*GuiCustom*/List implements CommandListener,
 						   Locale.get("guiwaypoint.DeleteThem")/*a file and delete them to show the remaining waypoints.*/,
 					Alert.FOREVER);
 			}
+			//#endif
 	}
 
 	public void uploadAborted() {
