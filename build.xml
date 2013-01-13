@@ -335,10 +335,10 @@
 	as the files get compiled during the Android build process.     			
 -->
 				<requirement name="Identifier" value="Generic/android-full-connected" />
+<!--
 				<requirement name="Identifier" value="Generic/android-full" />
 				<requirement name="Identifier" value="Generic/android-midsize" />
 				<requirement name="Identifier" value="Generic/android-minimal" />
-<!--
 
 				<requirement name="Identifier" value="Generic/android-offline" />
 				<requirement name="Identifier" value="Generic/android-online" />
@@ -452,7 +452,6 @@
 			</obfuscator>
 			
 			<!-- sign key="gpsmid" keystore="gpsmidkey.jks"	password="${password}" unless="test" /> -->
-			<sign key="gpsmid" keystore="gpsmidkey.jks"     password="${password}" />
 			
 			<!-- debug settings: only include debug setting when the test-property is true -->
 			<debug if="logging" showLogOnError="true" verbose="true" level="debug">
