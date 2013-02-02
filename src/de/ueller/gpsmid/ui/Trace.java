@@ -3181,6 +3181,8 @@ CompassReceiver, Runnable , GpsMidDisplayable, CompletionListener, IconActionPer
 
 	private void setSpeedingSign(int maxSpeed) {
 		//speeding = true;
+		int currentSpeedFontFlag = LayoutElement.FLAG_FONT_MEDIUM;
+		int currentSpeedHeightPercent= 100;
 		if (Configuration.getCfgBitState(Configuration.CFGBIT_SPEEDALERT_VISUAL)
 			&&
 			(
@@ -3225,12 +3227,17 @@ CompassReceiver, Runnable , GpsMidDisplayable, CompletionListener, IconActionPer
 				tl.ele[TraceLayout.SPEEDING_SIGN].setText(Integer.toString((int)(speedingSpeedLimit / 1.609344f + 0.5f)));
 			}
 			//#endif
+			// show current speed bigger while speeding
+			currentSpeedFontFlag = LayoutElement.FLAG_FONT_LARGE;
+			currentSpeedHeightPercent= 125;
 		} else {
 			startTimeOfSpeedingSign = 0;
 			//#if polish.api.finland
 			startTimeOfCameraAlert = 0;
 			//#endif
 		}
+		tl.ele[TraceLayout.SPEED_CURRENT].setFlag(currentSpeedFontFlag);
+		tl.ele[TraceLayout.SPEED_CURRENT].setHeightPercent(currentSpeedHeightPercent);
 	}
 
 	private void setAlertSign(String alert) {
