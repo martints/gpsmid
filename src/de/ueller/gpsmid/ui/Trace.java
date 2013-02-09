@@ -4867,6 +4867,7 @@ CompassReceiver, Runnable , GpsMidDisplayable, CompletionListener, IconActionPer
 		if (this.route != null) {
 			// reset off-route as soon as first route connection is known
 			RouteInstructions.resetOffRoute(this.route, center);
+			RouteInstructions.icCountAfterRouteCalc = ImageCollector.createImageCount;
 
 			if (routeEngine != null) {
 				if (ri == null) {

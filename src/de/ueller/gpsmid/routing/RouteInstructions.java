@@ -75,6 +75,7 @@ public class RouteInstructions {
 	
 	public static volatile boolean haveBeenOnRouteSinceCalculation = false;
 	public static volatile int startDstToFirstArrowAfterCalculation = 0;
+	public static volatile long icCountAfterRouteCalc = 0;
 	
 	private static int iPassedRouteArrow=0;
 	private static int iInstructionSaidArrow = -1;
@@ -787,7 +788,8 @@ public class RouteInstructions {
 		// calculate distance to first arrow after calculation
 		int dstToFirstArrow = (int) (ProjMath.getDistance(center.radlat, center.radlon, c0.to.lat, c0.to.lon));
 		if ((haveBeenOnRouteSinceCalculation && dstToRoutePath >= 50) ||
-			(!haveBeenOnRouteSinceCalculation && (dstToFirstArrow - startDstToFirstArrowAfterCalculation) > 50)
+			(!haveBeenOnRouteSinceCalculation && (dstToFirstArrow - startDstToFirstArrowAfterCalculation) > 50) ||
+			(dstToRoutePath == DISTANCE_UNKNOWN && (ImageCollector.createImageCount - icCountAfterRouteCalc) > 5)			
 		) {
 			// use red background color
 			routeInstructionColor=Legend.COLORS[Legend.COLOR_RI_OFF_ROUTE_FULL];
@@ -807,7 +809,8 @@ public class RouteInstructions {
 			return true;
 		} else if (
 			(haveBeenOnRouteSinceCalculation && dstToRoutePath >= 25) ||
-			(!haveBeenOnRouteSinceCalculation && (dstToFirstArrow - startDstToFirstArrowAfterCalculation) > 25)
+			(!haveBeenOnRouteSinceCalculation && (dstToFirstArrow - startDstToFirstArrowAfterCalculation) > 25) ||
+			(dstToRoutePath == DISTANCE_UNKNOWN && trace.getDataReader().getRequestQueueSize() == 0 && (ImageCollector.createImageCount - icCountAfterRouteCalc) > 3)			
 		) {
 			// use orange background color
 			routeInstructionColor=Legend.COLORS[Legend.COLOR_RI_OFF_ROUTE_SLIGHT];
