@@ -789,7 +789,7 @@ public class RouteInstructions {
 		int dstToFirstArrow = (int) (ProjMath.getDistance(center.radlat, center.radlon, c0.to.lat, c0.to.lon));
 		if ((haveBeenOnRouteSinceCalculation && dstToRoutePath >= 50) ||
 			(!haveBeenOnRouteSinceCalculation && (dstToFirstArrow - startDstToFirstArrowAfterCalculation) > 50) ||
-			(dstToRoutePath == DISTANCE_UNKNOWN && (ImageCollector.createImageCount - icCountAfterRouteCalc) > 5)			
+			(dstToRoutePath == DISTANCE_UNKNOWN && trace.getDataReader().getRequestQueueSize() == 0 && (ImageCollector.createImageCount - icCountAfterRouteCalc) > 5)			
 		) {
 			// use red background color
 			routeInstructionColor=Legend.COLORS[Legend.COLOR_RI_OFF_ROUTE_FULL];
