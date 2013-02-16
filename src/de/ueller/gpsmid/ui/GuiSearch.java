@@ -888,11 +888,6 @@ public class GuiSearch extends Canvas implements CommandListener,
 	protected void paint(Graphics gc) {
 		//#debug debug
 		logger.debug("Painting search screen with offset: " + scrollOffset);
-		//#if polish.android
-		int extraOffset = gsl.ele[GuiSearchLayout.TEXT].getFontHeight();
-		//#else
-		int extraOffset = 0;
-		//#endif
 		if (Configuration.getCfgBitSavedState(Configuration.CFGBIT_LARGE_FONT)) {
 			Font fontLarge = Font.getFont(Font.FACE_SYSTEM, Font.STYLE_PLAIN, Font.SIZE_LARGE);  
 			gc.setFont(fontLarge);
@@ -901,7 +896,7 @@ public class GuiSearch extends Canvas implements CommandListener,
 		if (fontSize == 0) {
 			fontSize = gc.getFont().getHeight();
 		}		
-		int yc=scrollOffset + renderDiff + extraOffset;
+		int yc=scrollOffset + renderDiff + getExtraOffsetY();
 		int reducedName=0;
 		gc.setColor(Legend.COLORS[Legend.COLOR_SEARCH_BACKGROUND]);
 		gc.fillRect(0, renderDiff, maxX, maxY);
@@ -1165,6 +1160,14 @@ public class GuiSearch extends Canvas implements CommandListener,
 		}
 	}
 
+	private int getExtraOffsetY() {
+		//#if polish.android
+		return gsl.ele[GuiSearchLayout.TEXT].getFontHeight();
+		//#else
+		return 0;
+		//#endif
+	}
+	    
 	protected boolean hasWordSearch() {
 		return Configuration.getCfgBitState(Configuration.CFGBIT_WORD_ISEARCH)
 			&& (Legend.enableMap72MapFlags == false || Legend.getLegendMapFlag(Legend.LEGEND_MAPFLAG_WORDSEARCH));
@@ -1699,7 +1702,7 @@ public class GuiSearch extends Canvas implements CommandListener,
 		if (fontSize == 0) {
 			return;
 		}
-		int clickIdx = (y - renderDiff - scrollOffset)/fontSize;
+		int clickIdx = (y - renderDiff - scrollOffset - getExtraOffsetY())/fontSize;
 		//#if polish.android
 		if (clickIdx == 0) {
 			enableNativeKeyboard();
@@ -1779,12 +1782,7 @@ public class GuiSearch extends Canvas implements CommandListener,
 		if (fontSize == 0) {
 			return;
 		}
-		//#if polish.android
-		int extraOffset = gsl.ele[GuiSearchLayout.TEXT].getFontHeight();
-		//#else
-		int extraOffset = 0;
-		//#endif
-		int clickIdx = (y - renderDiff - scrollOffset - extraOffset)/fontSize;
+		int clickIdx = (y - renderDiff - scrollOffset - getExtraOffsetY())/fontSize;
 		long currTime = System.currentTimeMillis();
 		if (Configuration.getCfgBitSavedState(Configuration.CFGBIT_SEARCH_TOUCH_NUMBERKEYPAD)
 		    && !hideKeypad
