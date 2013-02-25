@@ -622,6 +622,7 @@ scale alias 1: zoomed out 21x
 		<description desc = "Bus stop"/>
 		<image src="bus.png"/>		
 		<namekey tag="name"/>
+		<namefallback tag="route_ref"/>
 		<AreaPOI createForAreas="true"/>
 		<scale scale="23"/>
 		<textscale scale="26"/>
