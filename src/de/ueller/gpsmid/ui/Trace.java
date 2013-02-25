@@ -1918,8 +1918,11 @@ CompassReceiver, Runnable , GpsMidDisplayable, CompletionListener, IconActionPer
 				gpsRecenter = true;
 				gpsRecenterInvalid = true;
 				gpsRecenterStale = true;
-				autoZoomed = true;
 				restoreRotationMode();
+				if (Configuration.getCfgBitState(Configuration.CFGBIT_AUTOZOOM) && !autoZoomed) {		
+					scale = calculateAutoZoomScale();				
+				}
+				autoZoomed = true;
 				if (pos.latitude != 0.0f) {
 					receivePosition(pos);
 				}
