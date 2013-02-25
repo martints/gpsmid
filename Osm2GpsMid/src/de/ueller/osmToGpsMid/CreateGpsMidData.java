@@ -132,6 +132,9 @@ public class CreateGpsMidData implements FilenameFilter {
 	private static double MAX_RAD_RANGE = (Short.MAX_VALUE - Short.MIN_VALUE - 2000) / MyMath.FIXPT_MULT;
 	private String[] useLang = null;
 
+	private int numNumericOverflowsLat = 0;
+	private int numNumericOverflowsLon = 0;
+	
 	WayRedirect wayRedirect = null;
 		
 
@@ -1810,23 +1813,33 @@ public class CreateGpsMidData implements FilenameFilter {
 
 			// see https://sourceforge.net/tracker/index.php?func=detail&aid=3556775&group_id=192084&atid=939974 for details of how this relates to area outlines
 
-			System.err.println("WARNING: Numeric overflow of latitude, " + tmpLat + " for node: " + n.id + ", trying to handle");
+			if (numNumericOverflowsLat < 100) {
+				System.err.println("WARNING: Numeric overflow of latitude, " + tmpLat + " for node: " + n.id + ", trying to handle");
+			} else if (numNumericOverflowsLat == 100) {			
+				System.err.println("WARNING: Only first 100 numeric overflows of latitude were shown");
+			}
 			if (tmpLat > Short.MAX_VALUE) {
 				tmpLat = Short.MAX_VALUE - 10;
 			}
 			if (tmpLat < Short.MIN_VALUE) {
 				tmpLat = Short.MIN_VALUE + 10;
 			}
+			numNumericOverflowsLat++;
 		}
 
 		if ((tmpLon > Short.MAX_VALUE) || (tmpLon < Short.MIN_VALUE)) {
-			System.err.println("WARNING: Numeric overflow of longitude, " + tmpLon + " for node: " + n.id + ", trying to handle");
+			if (numNumericOverflowsLon < 100) {
+				System.err.println("WARNING: Numeric overflow of longitude, " + tmpLon + " for node: " + n.id + ", trying to handle");
+			} else if (numNumericOverflowsLon == 100) {
+				System.err.println("WARNING: Only first 100 numeric overflows of longitude were shown");				
+			}
 			if (tmpLon > Short.MAX_VALUE) {
 				tmpLon = Short.MAX_VALUE - 10;
 			}
 			if (tmpLon < Short.MIN_VALUE) {
 				tmpLon = Short.MIN_VALUE + 10;
 			}
+			numNumericOverflowsLon++;
 		}
 
 		ds.writeShort((short)tmpLat);
