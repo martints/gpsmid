@@ -291,7 +291,6 @@ public class Legend {
 	}
 	
 	public static void readLegend() throws IOException {
-		COLOR_COUNT = 89;
 		enableEdits = false;
 		enableBigStyles = false;
 		enableMap66Search = false;
@@ -356,6 +355,7 @@ public class Legend {
 		    && mapFormatVersion != 69
 		    && mapFormatVersion != 70
 		    && mapFormatVersion != 71
+		    && mapFormatVersion != 72
 		) {
 		        Trace.getInstance().alert(Locale.get("legend.wrongmapvertitle"),
 				     Locale.get("legend.wrongmapvermsg1") + " " + MAP_FORMAT_VERSION
@@ -433,7 +433,7 @@ public class Legend {
 		}
 
 		if (count != COLOR_COUNT) {
-			throw new IOException("Map file contains " + count + "colors but midlet's COLOR_COUNT is " + COLOR_COUNT);
+			throw new IOException("Map V"+ mapFormatVersion + " file contains " + count + " colors but midlet's COLOR_COUNT is " + COLOR_COUNT);
 		}
 		for (int i = 0; i < COLOR_COUNT; i++) {
 			COLORS[i] = readDayOrNightColor(ds);
