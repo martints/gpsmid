@@ -1988,7 +1988,8 @@ public class Way extends Entity {
 						setBorderColor(pc, wayDesc,(hl[i] >= 0), 
 							       (isCurrentRoutePath(pc, i) || dividedHighlight), 
 							       (highlight == HIGHLIGHT_DEST));
-						if (! Configuration.getCfgBitState(Configuration.CFGBIT_NOSTREETBORDERS) || isCurrentRoutePath(pc, i)) {
+						// draw street borders when turned on or when this segment is part of the route line  
+						if (! Configuration.getCfgBitState(Configuration.CFGBIT_NOSTREETBORDERS) || hl[i] >= 0) {
 						    pc.g.drawLine(l2b.x, l2b.y, l2e.x, l2e.y);
 						    pc.g.drawLine(l1b.x, l1b.y, l1e.x, l1e.y);
 						}
@@ -2026,7 +2027,8 @@ public class Way extends Entity {
 							setBorderColor(pc, wayDesc, (hl[i] >= 0), 
 								       (isCurrentRoutePath(pc, i) || dividedHighlight), 
 								       (highlight == HIGHLIGHT_DEST));
-							if (! Configuration.getCfgBitState(Configuration.CFGBIT_NOSTREETBORDERS) || isCurrentRoutePath(pc, i)) {
+							// draw street borders when turned on or when this segment is part of the route line  
+							if (! Configuration.getCfgBitState(Configuration.CFGBIT_NOSTREETBORDERS) || hl[i] >= 0) {
 							    if (highlight == HIGHLIGHT_NONE) {
 								//paint the inner turn border to the intersection point between old and current waysegment 
 								pc.g.drawLine(intersecP.x, intersecP.y, l2e.x, l2e.y);
@@ -2063,7 +2065,8 @@ public class Way extends Entity {
 							setBorderColor(pc, wayDesc, (hl[i] >= 0), 
 									(isCurrentRoutePath(pc, i) || dividedHighlight), 
 									(highlight == HIGHLIGHT_DEST));
-							if (! Configuration.getCfgBitState(Configuration.CFGBIT_NOSTREETBORDERS) || isCurrentRoutePath(pc, i)) {
+							// draw street borders when turned on or when this segment is part of the route line  
+							if (! Configuration.getCfgBitState(Configuration.CFGBIT_NOSTREETBORDERS) || hl[i] >= 0) {
 								if (highlight == HIGHLIGHT_NONE) {
 									//see comments above
 									pc.g.drawLine(intersecP.x, intersecP.y, l1e.x, l1e.y);
@@ -2094,7 +2097,8 @@ public class Way extends Entity {
 							setBorderColor(pc, wayDesc, (hl[i] >= 0), 
 									(isCurrentRoutePath(pc, i) || dividedHighlight), 
 									(highlight == HIGHLIGHT_DEST));
-							if (! Configuration.getCfgBitState(Configuration.CFGBIT_NOSTREETBORDERS) || isCurrentRoutePath(pc, i)) {
+							// draw street borders when turned on or when this segment is part of the route line
+							if (! Configuration.getCfgBitState(Configuration.CFGBIT_NOSTREETBORDERS) || hl[i] >= 0) {
 								pc.g.drawLine(l2b.x, l2b.y, l2e.x, l2e.y);
 								// paint the full outer turn border
 								pc.g.drawLine(l1b.x, l1b.y, l1e.x, l1e.y);
