@@ -12,6 +12,7 @@ package de.ueller.osmToGpsMid.area;
 
 import java.util.ArrayList;
 import java.util.Collections;
+import java.util.Comparator;
 import java.util.Iterator;
 import java.util.List;
 
@@ -401,39 +402,23 @@ public class Area {
 //	}
 
 	private Vertex findEdgeInside(Outline outline, Triangle triangle, int dir) {
-		ArrayList<Vertex> ret = outline.findVertexInside(triangle, null);
-		for (Outline p : holeList) {
-			ret = p.findVertexInside(triangle, ret);
-		}
-		if (ret == null) {
-			return null;
-		}
-		//System.err.println("Starting to sort in findEdgeInside()");
-//		switch (dir) {
-//		case 0:
-//			    Collections.sort(ret, new DirectionComperator0());
-//			    break;
-//		case 1:
-//			    Collections.sort(ret, new DirectionComperator1());
-//			    break;
-//		case 2:
-//			    Collections.sort(ret, new DirectionComperator2());
-//			    break;
-//		default:
-//			    Collections.sort(ret, new DirectionComperatorX());
-//			    break;
-//		}
-		//System.err.println("Starting to sort in findEdgeInside()");
+   	        Comparator<Vertex> comp;
 		switch (dir) {
 		case 0:
-			    return Collections.min(ret, new DirectionComperator0());
+			    comp = new DirectionComperator0();
 		case 1:
-			    return Collections.min(ret, new DirectionComperator1());
+			    comp = new DirectionComperator1();
 		case 2:
-			    return Collections.min(ret, new DirectionComperator2());
+			    comp = new DirectionComperator2();
 		default:
-			    return Collections.min(ret, new DirectionComperatorX());
+			    comp = new DirectionComperatorX();
 		}
+
+		Vertex ret = outline.findFirstVertexInside(triangle, comp, null);
+		for (Outline p : holeList) {
+		    ret = p.findFirstVertexInside(triangle, comp, ret);
+		}
+		return ret;
 	}
 	
 	public Bounds extendBounds(Bounds b) {

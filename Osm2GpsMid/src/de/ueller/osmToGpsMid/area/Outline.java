@@ -13,6 +13,7 @@ package de.ueller.osmToGpsMid.area;
 
 import java.util.ArrayList;
 import java.util.Collections;
+import java.util.Comparator;
 import java.util.Iterator;
 import java.util.List;
 
@@ -195,16 +196,15 @@ public class Outline {
     //	}
     //	
 	public Vertex getMin(int dir) {
-		ArrayList<Vertex> ordered = (ArrayList<Vertex>) vertexList.clone();
 		switch (dir) {
 		case 0:
-			    return Collections.min(ordered, new DirectionComperator0());
+			    return Collections.min(vertexList, new DirectionComperator0());
 		case 1:
-			    return Collections.min(ordered, new DirectionComperator1());
+			    return Collections.min(vertexList, new DirectionComperator1());
 		case 2:
-			    return Collections.min(ordered, new DirectionComperator2());
+			    return Collections.min(vertexList, new DirectionComperator2());
 		default:
-			    return Collections.min(ordered, new DirectionComperatorX());
+			    return Collections.min(vertexList, new DirectionComperatorX());
 		}
 	}
 	
@@ -224,16 +224,30 @@ public class Outline {
 //	}
 
 	public ArrayList<Vertex> findVertexInside(Triangle triangle, ArrayList<Vertex> ret) {
-		for (int i=0; i<vertexList.size(); i++) {
-			Vertex vertex = vertexList.get(i);
-			if (triangle.isVertexInside(vertex)){
-				if (ret == null) {
-					ret = new ArrayList<Vertex>();
-				}
-				ret.add(vertex);
-			}
+	    if (ret == null) {
+		ret = new ArrayList<Vertex>();
+	    }
+	    for (Vertex vertex : vertexList) {
+		if (triangle.isVertexInside(vertex)){
+		    ret.add(vertex);
 		}
+	    }
+	    if (ret.isEmpty()) {
+		return null;
+	    } else {
 		return ret;
+	    }
+	}
+
+    public Vertex findFirstVertexInside(Triangle triangle, Comparator<Vertex> comp, Vertex first) {
+	    for (Vertex vertex : vertexList) {
+		if (triangle.isVertexInside(vertex)){
+		    if ((first == null) || (comp.compare(first, vertex) > 0)) {
+			first = vertex;
+		    }
+		}
+	    }
+	    return first;
 	}
 
 	public void remove(Vertex v) {
