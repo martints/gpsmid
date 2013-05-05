@@ -543,6 +543,11 @@ public class Way extends Entity implements Comparable<Way> {
 					maxSpeed *= 1.609; // Convert to km/h
 				}
 			} catch (NumberFormatException e) {
+			    if (maxSpeedAttr.indexOf(";") > 0) {
+				return parseMaxSpeed(maxSpeedAttr.substring(0, maxSpeedAttr.indexOf(";")).trim(), winterFlag);
+			    } else if (maxSpeedAttr.indexOf(" ") > 0) {
+				return parseMaxSpeed(maxSpeedAttr.substring(0, maxSpeedAttr.indexOf(" ")).trim(), winterFlag);
+			    } else {
 				try {
 					int maxs = config.getMaxspeedTemplate(maxSpeedAttr);
 					if (maxs > 0) {
@@ -556,6 +561,7 @@ public class Way extends Entity implements Comparable<Way> {
 						lastUnhandledMaxSpeedWayId = this.id;
 					}
 				}
+			    }
 			}
 		}
 		return maxSpeed;
