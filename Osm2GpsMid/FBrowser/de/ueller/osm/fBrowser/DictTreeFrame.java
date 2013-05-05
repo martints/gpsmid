@@ -29,7 +29,7 @@ import sun.reflect.generics.tree.Tree;
  */
 public class DictTreeFrame extends JInternalFrame implements TreeSelectionListener {
 	private static final long serialVersionUID = 1L;
-	static final int xOffset = 30
+	static final int xOffset = 30;
 	static final int yOffset = 30;
 	static int openFrameCount = 0;
 	private Tile dict;
