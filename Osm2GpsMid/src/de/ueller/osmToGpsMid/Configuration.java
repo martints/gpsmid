@@ -1197,7 +1197,7 @@ public class Configuration {
 					if (planet.endsWith(".bz2")) {
 						fr.read();
 						fr.read();
-						fr = new CBZip2InputStream(fr);
+						fr = new CBZip2InputStream(new ThreadBufferedInputStream(fr));
 					} else if (planet.endsWith(".gz")) {
 						fr = new GZIPInputStream(fr);
 					}
