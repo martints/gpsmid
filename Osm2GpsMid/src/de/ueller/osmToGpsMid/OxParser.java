@@ -38,8 +38,7 @@ public class OxParser extends OsmParser {
 		@Override
 		public void startDocument() {
 			System.out.println("Start of Document");
-			System.out
-					.println("Nodes read/used, Ways read/used, Relations read/partial/used");
+			System.out.println("Nodes read/used, Ways read/used, Relations read/partial/used");
 		}
 
 		@Override
@@ -69,13 +68,11 @@ public class OxParser extends OsmParser {
 				} else {
 					current = null;
 				}
-			}
-			if (qName.equals("way")) {
+			} else if (qName.equals("way")) {
 				long id = Long.parseLong(atts.getValue("id"));
 				current = new Way(id);
 				((Way) current).used = true;
-			}
-			if (qName.equals("nd")) {
+			} else if (qName.equals("nd")) {
 				if (current instanceof Way) {
 					Way way = ((Way) current);
 					long ref = Long.parseLong(atts.getValue("ref"));
@@ -105,8 +102,7 @@ public class OxParser extends OsmParser {
 						}
 					}
 				}
-			}
-			if (qName.equals("tag")) {
+			} else if (qName.equals("tag")) {
 				if (current != null) {
 					String key = atts.getValue("k");
 					String val = atts.getValue("v");
@@ -137,12 +133,10 @@ public class OxParser extends OsmParser {
 						}
 					}
 				}
-			}
-			if (qName.equals("relation")) {
+			} else if (qName.equals("relation")) {
 				long id = Long.parseLong(atts.getValue("id"));
 				current = new Relation(id);
-			}
-			if (qName.equals("member")) {
+			} else if (qName.equals("member")) {
 				if (current instanceof Relation) {
 					Relation r = (Relation) current;
 					Member m = new Member(atts.getValue("type"), atts
@@ -200,9 +194,7 @@ public class OxParser extends OsmParser {
 				Node n = (Node) current;
 				previousNodeWithThisId = nodes.put(n.id, n);
 				nodeIns++;
-				if (current.getAttribute("highway") != null
-						&& current.getAttribute("highway").equalsIgnoreCase(
-								"traffic_signals")) {
+				if ("traffic_signals".equalsIgnoreCase(current.getAttribute("highway"))) {
 					// decrement trafficSignalCount if a previous node with this
 					// id got replaced but was a traffic signal node
 					if (previousNodeWithThisId != null
@@ -216,8 +208,7 @@ public class OxParser extends OsmParser {
 					trafficSignalCount++;
 				}
 				current = null;
-			}
-			if (qName.equals("way")) {
+			} else if (qName.equals("way")) {
 				wayTot++;
 				Way w = (Way) current;
 				// TODO: this seems to be not useful, because the list of tags
@@ -241,8 +232,7 @@ public class OxParser extends OsmParser {
 				}
 				
 				current = null;
-			}
-			if (qName.equals("relation")) {
+			} else if (qName.equals("relation")) {
 				relTot++;
 				/**
 				 * Store way and node refs temporarily in the same variable Way
