@@ -362,7 +362,7 @@ public class Tile {
 			}
 		} else if (type == TYPE_ROUTEDATA && bounds.isInOrAlmostIn(n.lat, n.lon)) {
 			for (RouteNode rn : routeNodes) {
-				if (MyMath.dist(n, rn.node) < 25) {
+				if (MyMath.estimate_dist(n, rn.node) < 25) {
 					if (!rn.node.isNeverTrafficSignalsRouteNode()) {
 						rn.node.markAsTrafficSignalsRouteNode();
 						numTrafficSignalRouteNodes++;

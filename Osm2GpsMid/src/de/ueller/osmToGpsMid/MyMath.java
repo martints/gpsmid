@@ -114,20 +114,38 @@ public class MyMath {
 //		return (long)(c*CIRCUMMAX_PI);
 //	}
 
-	public final static long dist(Node from,Node to){
+    public final static long estimate_dist(Node from, Node to) {
+	double dlon = Math.abs(Math.toRadians(from.lon - to.lon));
+	double dlat = Math.abs(Math.toRadians(from.lat - to.lat));
+	return (long)(PLANET_RADIUS * (dlon + dlat));
+    }
+
+    public final static long dist(Node from, Node to) {
+	double dlon = Math.abs(Math.toRadians(from.lon - to.lon));
+	double dlat = Math.abs(Math.toRadians(from.lat - to.lat));
+	if ((dlon < 0.01) && (dlat < 0.01)) {
+	    return (long)(PLANET_RADIUS * Math.sqrt(dlon*dlon + dlat*dlat));
+	} else {
 		return (long)( spherical_distance(
 				Math.toRadians(from.lat),
 				Math.toRadians(from.lon),
 				Math.toRadians(to.lat),
 				Math.toRadians(to.lon)));
 	}
+    }
 
 	public final static long dist(Node from,Node to,double factor) {
+	    double dlon = Math.abs(Math.toRadians(from.lon - to.lon));
+	    double dlat = Math.abs(Math.toRadians(from.lat - to.lat));
+	    if ((dlon < 0.01) && (dlat < 0.01)) {
+		return (long)(factor * PLANET_RADIUS * Math.sqrt(dlon*dlon + dlat*dlat));
+	    } else {
 		return (long)( factor * spherical_distance(
 				Math.toRadians(from.lat),
 				Math.toRadians(from.lon),
 				Math.toRadians(to.lat),
 				Math.toRadians(to.lon)));
+	    }
 	}
 	
 	/**
@@ -198,12 +216,18 @@ public class MyMath {
 	 * @return Angular distance in radians
 	 */
 	public static double calcDistance(double lat1, double lon1, double lat2, double lon2) {
+	    double dlon = Math.abs(lon1 - lon2);
+	    double dlat = Math.abs(lat1 - lat2);
+	    if ((dlon < 0.01) && (dlat < 0.01)) {
+		return Math.sqrt(dlon*dlon + dlat*dlat);
+	    } else {
 		// Taken from http://williams.best.vwh.net/avform.htm
-		double p1 = Math.sin((lat1 - lat2) / 2);
-		double p2 = Math.sin((lon1 - lon2) / 2);
+		double p1 = Math.sin(dlat / 2);
+		double p2 = Math.sin(dlon / 2);
 		double d = 2 * Math.asin(Math.sqrt(p1 * p1
 						+ Math.cos(lat1) * Math.cos(lat2) * p2 * p2));
 		return d;
+	    }
 	}
 
 
