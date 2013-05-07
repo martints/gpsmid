@@ -15,6 +15,9 @@ import java.util.Collection;
 import java.util.HashSet;
 import java.util.Map;
 import java.util.Set;
+import java.util.AbstractSet;
+import java.util.Iterator;
+import java.util.NoSuchElementException;
 
 /**
  * This class implements a Map for small amounts of data by using an Array for 
@@ -110,16 +113,16 @@ public class SmallArrayMap<K, V> implements Map<K, V> {
 	 */
 	@Override
 	public Set<K> keySet() {
-		HashSet<K> res = new HashSet<K>();
-
-		if ( mapArray == null ) {
-			return res;
+	    return new InnerSet<K>() {
+		public int size() {
+		    return SmallArrayMap.this.size();
 		}
 
-		for (int i = 0; i < mapArray.length / 2; i++) {
-			res.add((K)mapArray[2 * i]);
+		protected K get(int i) {
+		    return (K) mapArray[2*i];
 		}
-		return res;
+		  
+	    };
 	}
 
 	/* (non-Javadoc)
@@ -198,14 +201,45 @@ public class SmallArrayMap<K, V> implements Map<K, V> {
 	 */
 	@Override
 	public Collection<V> values() {
-		HashSet<V> res = new HashSet<V>();
-		if (mapArray == null ) {
-			return res;
+	    return new InnerSet<V>() {
+		public int size() {
+		    return SmallArrayMap.this.size();
 		}
-		for (int i = 0; i < mapArray.length / 2; i++) {
-			res.add((V)mapArray[2 * i + 1]);
+
+		protected V get(int i) {
+		    return (V) mapArray[2*i + 1];
 		}
-		return res;
+		  
+	    };
 	}
 
+	private static abstract class InnerSet<E extends Object> 
+	    extends AbstractSet<E>
+	    implements Set<E> {
+
+	    protected abstract E get(int i);
+
+	    public abstract int size();
+	 
+	    public Iterator<E> iterator() {
+		return new Iterator<E>() {
+		    private int pos = 0;
+
+		    public E next() {
+			if (pos >= size()) {
+			    throw new NoSuchElementException();
+			}
+			return get(pos ++);
+		    }
+
+		    public boolean hasNext() {
+			return pos < size();
+		    }
+
+		    public void remove() {
+			throw new Error("Cannot modify the set ... ");
+		    }
+		};
+	    }
+	}
 }
