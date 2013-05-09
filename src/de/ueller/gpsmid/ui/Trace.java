@@ -731,7 +731,7 @@ CompassReceiver, Runnable , GpsMidDisplayable, CompletionListener, IconActionPer
 						if (zoomStarted && !rotationStarted) {
 							mtPointerDragged(pinchZoomDistance / dist(event) * pinchZoomScale);
 						}
-						if (rotationStarted) {
+						if (rotationStarted  && !zoomStarted) {
 							mtPointerRotated((360*3 + pinchZoomRotation - angle(event)) % 360);
 						}
 					}
