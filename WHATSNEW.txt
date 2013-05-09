@@ -16,9 +16,14 @@
     *** Usability ***
 	- changing travel mode in the map screen will now trigger a route recalc if a route is currently displayed or calculated
 	- when a speed alert is shown the current speed is displayed bigger in the map screen
+	- always draw borders for the route line even when street borders are turned off for better visibility of the route line in similiar colored areas
 	*** Routing ***
 	- if after a few ImageCollector paints the distance to the route line is still unknown 
 	  a route recalculation is triggered  
+	- No more falsely take direction into account when calculating the penalty for a one way
+      if the travel mode allows travelling against the direction (foot) or this is a one way
+      that allows travelling by bicycle against the one way and the travel mode (bicycle) allows this
+      (this should avoid triggering route recalculations in those situations)
     *** Others ***
     - reverted possible bugfix for startup trace crash issue on Nokia E72 when not in full-screen mode
       and Gps activated and started at startup, as it didn't fix the bug.
