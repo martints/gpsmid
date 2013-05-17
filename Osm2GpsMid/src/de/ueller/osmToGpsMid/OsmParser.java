@@ -69,8 +69,8 @@ public abstract class OsmParser {
 	protected ArrayList<TurnRestriction> turnRestrictionsWithViaWays = new ArrayList<TurnRestriction>();
 	private Node[] delayingNodes;
 	public int trafficSignalCount = 0;
-	private Vector<Bounds> bounds = null;
-	private Configuration configuration;
+	private final Bounds[] bounds;
+	private final Configuration configuration;
 	
 	protected int wayIns;
 
@@ -82,7 +82,12 @@ public abstract class OsmParser {
 	 */
 	public OsmParser(InputStream i, Configuration c) {
 		this.configuration = c;
-		this.bounds = c.getBounds();
+		Vector<Bounds> tmpBounds = c.getBounds();
+		if (tmpBounds == null) {
+			this.bounds = new Bounds[0];
+		} else {
+			this.bounds = tmpBounds.toArray(new Bounds[tmpBounds.size()]);
+		}
 		System.out.println(parserType() + " parser with bounds started...");
 		init(i);
 	}
@@ -92,26 +97,22 @@ public abstract class OsmParser {
 	protected abstract void init(InputStream i);
 
 	protected boolean nodeInArea(float lat, float lon) {
-		boolean inBound = false;
-
-		if (configuration.getArea() != null
-				&& configuration.getArea().contains(lat, lon)) {
-			inBound = true;
-		}
-		if (bounds != null && bounds.size() != 0) {
-			for (Bounds b : bounds) {
-				if (b.isIn(lat, lon)) {
-					inBound = true;
-					break;
-				}
+		boolean inBounds = false;
+		Area area = configuration.getArea();
+		if (area != null && area.contains(lat, lon)) {
+			inBounds = true;
+		} 
+		for (Bounds b : bounds) {
+			if (b.isIn(lat, lon)) {
+				inBounds = true;
+				break;
 			}
-		}
-		if ((bounds == null || bounds.size() == 0)
-				&& configuration.getArea() == null) {
-			inBound = true;
+		} 
+		if ((area == null) && (bounds.length == 0)) {
+			inBounds = true;
 		}
 
-		return inBound;
+		return inBounds;
 	}
 
 	/**
