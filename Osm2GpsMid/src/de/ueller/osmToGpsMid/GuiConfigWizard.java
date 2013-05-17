@@ -10,10 +10,8 @@
  */
 package de.ueller.osmToGpsMid;
 
-import de.ueller.osmToGpsMid.Configuration;
 import static de.ueller.osmToGpsMid.GetText._;
 
-import java.awt.BorderLayout;
 import java.awt.Color;
 import java.awt.Desktop;
 import java.awt.Dialog;

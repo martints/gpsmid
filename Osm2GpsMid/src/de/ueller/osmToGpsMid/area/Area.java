@@ -11,16 +11,13 @@
 package de.ueller.osmToGpsMid.area;
 
 import java.util.ArrayList;
-import java.util.Collections;
 import java.util.Comparator;
 import java.util.Iterator;
-import java.util.List;
 
+import uk.me.parabola.mkgmap.reader.osm.FakeIdGenerator;
 import de.ueller.osmToGpsMid.MyMath;
-import de.ueller.osmToGpsMid.OsmParser;
 import de.ueller.osmToGpsMid.model.Bounds;
 import de.ueller.osmToGpsMid.model.Node;
-import uk.me.parabola.mkgmap.reader.osm.FakeIdGenerator;
 
 public class Area {
 	private ArrayList<Outline>	outlineList	= new ArrayList<Outline>();
@@ -39,13 +36,6 @@ public class Area {
 	double limitdist = 32000d;
 	//double limitdist = 1250000d;
 	//double limitdist = 10000d;
-
-	private static OsmParser parser;
-
-	public static void setParser(OsmParser setParser) {
-		parser = setParser;
-	}
-	
 
 	public void addOutline(Outline p) {
 		if (p.isValid()) {
@@ -67,7 +57,7 @@ public class Area {
 		outline = new Outline();
 	}
 
-	public List<Triangle> triangulate() {
+	public ArrayList<Triangle> triangulate() {
 		if (debug) {
 			if (viewer == null) {
 				viewer = new DebugViewer(this);

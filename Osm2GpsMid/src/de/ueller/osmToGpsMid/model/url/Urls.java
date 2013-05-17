@@ -10,9 +10,7 @@ package de.ueller.osmToGpsMid.model.url;
 
 import java.util.Collection;
 import java.util.SortedMap;
-import java.util.SortedSet;
 import java.util.TreeMap;
-import java.util.TreeSet;
 
 import de.ueller.osmToGpsMid.model.Entity;
 

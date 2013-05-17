@@ -7,8 +7,6 @@
  */
 package de.ueller.osmToGpsMid.model;
 
-import de.ueller.osmToGpsMid.Configuration;
-import java.util.List;
 
 
 public class WayDescription extends EntityDescription{

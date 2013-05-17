@@ -13,8 +13,6 @@ package de.ueller.osmToGpsMid.model;
 
 import java.util.HashMap;
 
-import de.ueller.osmToGpsMid.model.Relation;
-
 public class TurnRestriction {
 	public long fromWayRef;
 	public long toWayRef;

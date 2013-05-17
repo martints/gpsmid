@@ -19,11 +19,11 @@ package uk.me.parabola.mkgmap.general;
 import java.util.ArrayList;
 import java.util.List;
 
-//import uk.me.parabola.imgfmt.app.Area;
-//import uk.me.parabola.imgfmt.app.Coord;
 import uk.me.parabola.mkgmap.reader.osm.FakeIdGenerator;
 import de.ueller.osmToGpsMid.model.Bounds;
 import de.ueller.osmToGpsMid.model.Node;
+//import uk.me.parabola.imgfmt.app.Area;
+//import uk.me.parabola.imgfmt.app.Coord;
 
 /**
  * Routine to clip a polyline to a given bounding box.

@@ -11,14 +11,13 @@
 
 package de.ueller.osmToGpsMid;
 
-import java.lang.Long;
 import java.util.HashMap;
 import java.util.List;
 
 import de.ueller.osmToGpsMid.model.Entity;
 import de.ueller.osmToGpsMid.model.Node;
-import de.ueller.osmToGpsMid.model.Way;
 import de.ueller.osmToGpsMid.model.POIdescription;
+import de.ueller.osmToGpsMid.model.Way;
 import de.ueller.osmToGpsMid.model.WayDescription;
 import edu.wlu.cs.levy.CG.KDTree;
 import edu.wlu.cs.levy.CG.KeyDuplicateException;

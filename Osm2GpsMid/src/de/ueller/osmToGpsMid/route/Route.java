@@ -9,9 +9,6 @@
 package de.ueller.osmToGpsMid.route;
 
 import java.awt.Dimension;
-import java.awt.Point;
-import java.awt.Shape;
-import java.awt.geom.Arc2D;
 import java.awt.geom.Area;
 import java.awt.geom.Path2D;
 import java.awt.geom.PathIterator;

@@ -4,8 +4,6 @@ package de.ueller.osmToGpsMid.model.url;
 import java.util.ArrayList;
 
 import de.ueller.osmToGpsMid.model.Entity;
-import de.ueller.osmToGpsMid.model.Node;
-import de.ueller.osmToGpsMid.model.Way;
 
 /**
  * @author hmueller

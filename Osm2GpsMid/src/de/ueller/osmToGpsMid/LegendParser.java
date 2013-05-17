@@ -22,7 +22,6 @@ import java.util.LinkedList;
 import java.util.Set;
 import java.util.Vector;
 
-import javax.xml.parsers.SAXParser;
 import javax.xml.parsers.SAXParserFactory;
 
 import org.xml.sax.Attributes;
@@ -34,7 +33,6 @@ import org.xml.sax.SAXParseException;
 import org.xml.sax.XMLReader;
 import org.xml.sax.helpers.DefaultHandler;
 
-import de.ueller.osmToGpsMid.Configuration;
 import de.ueller.osmToGpsMid.model.ConditionTuple;
 import de.ueller.osmToGpsMid.model.Connection;
 import de.ueller.osmToGpsMid.model.Damage;

@@ -11,8 +11,6 @@ import java.util.Enumeration;
 
 import javax.swing.tree.TreeNode;
 
-import com.sun.org.apache.bcel.internal.generic.GETSTATIC;
-
 import de.ueller.osmToGpsMid.model.Way;
 
 /**
@@ -109,7 +107,7 @@ public class BWay implements TreeNode {
 	 * @see javax.swing.tree.TreeNode#children()
 	 */
 	@Override
-	public Enumeration children() {
+	public Enumeration<TreeNode> children() {
 		// TODO Auto-generated method stub
 		return null;
 	}

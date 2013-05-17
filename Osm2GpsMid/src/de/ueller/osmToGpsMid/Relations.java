@@ -14,20 +14,17 @@ package de.ueller.osmToGpsMid;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Iterator;
-import java.util.List;
 import java.util.Map;
 
+import uk.me.parabola.mkgmap.reader.osm.FakeIdGenerator;
 import de.ueller.osmToGpsMid.area.Area;
 import de.ueller.osmToGpsMid.area.Outline;
 import de.ueller.osmToGpsMid.area.Triangle;
 import de.ueller.osmToGpsMid.area.Vertex;
 import de.ueller.osmToGpsMid.model.Member;
-import de.ueller.osmToGpsMid.model.Relation;
 import de.ueller.osmToGpsMid.model.Node;
+import de.ueller.osmToGpsMid.model.Relation;
 import de.ueller.osmToGpsMid.model.Way;
-import de.ueller.osmToGpsMid.model.Entity;
-import de.ueller.osmToGpsMid.model.name.Names;
-import uk.me.parabola.mkgmap.reader.osm.FakeIdGenerator;
 
 /**
  * @author hmueller
@@ -360,7 +357,7 @@ public class Relations {
 					}
 					try {
 						if (Configuration.getConfiguration().triangleAreaFormat) {
-							List<Triangle> areaTriangles = a.triangulate();
+							ArrayList<Triangle> areaTriangles = a.triangulate();
 							firstWay.triangles = areaTriangles;
 							//firstWay.recreatePathAvoidDuplicates();
 							firstWay.recreatePath();

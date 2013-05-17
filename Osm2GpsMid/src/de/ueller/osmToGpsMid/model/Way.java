@@ -20,7 +20,6 @@ import java.util.Set;
 import java.util.Vector;
 
 import uk.me.parabola.mkgmap.reader.osm.FakeIdGenerator;
-
 import de.ueller.osmToGpsMid.Configuration;
 import de.ueller.osmToGpsMid.Constants;
 import de.ueller.osmToGpsMid.LegendParser;
@@ -30,7 +29,6 @@ import de.ueller.osmToGpsMid.area.Outline;
 import de.ueller.osmToGpsMid.area.Triangle;
 import de.ueller.osmToGpsMid.area.Vertex;
 import de.ueller.osmToGpsMid.model.name.Names;
-import de.ueller.osmToGpsMid.model.TravelModes;
 import de.ueller.osmToGpsMid.model.url.Urls;
 
 
@@ -76,7 +74,7 @@ public class Way extends Entity implements Comparable<Way> {
 	private Path					outlinePath								= null;
 	private ArrayList<Path> 		holes = null;
 	public HouseNumber			housenumber							= null;
-	public List<Triangle>		triangles							= null;
+	public ArrayList<Triangle>		triangles							= null;
 	//private Bounds				bound								= null;
 
 	/** Up to 4 travel modes for which this way can be used (motorcar, bicycle, etc.)
@@ -1449,7 +1447,7 @@ public class Way extends Entity implements Comparable<Way> {
 				//}
 			}
 		}
-		((ArrayList)triangles).trimToSize();
+		triangles.trimToSize();
 		trimPath();
 		//clearBounds();
 	}
@@ -1469,7 +1467,7 @@ public class Way extends Entity implements Comparable<Way> {
 				}
 			}
 		}
-		((ArrayList)triangles).trimToSize();
+		triangles.trimToSize();
 		trimPath();
 		//clearBounds();
 	}

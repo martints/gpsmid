@@ -11,7 +11,6 @@
 package de.ueller.osmToGpsMid.area;
 
 import de.ueller.osmToGpsMid.model.Bounds;
-import de.ueller.osmToGpsMid.model.Node;
 
 public class Triangle {
 	private final Vertex[] vert = new Vertex[3];

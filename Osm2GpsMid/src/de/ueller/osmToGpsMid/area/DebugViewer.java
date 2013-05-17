@@ -17,7 +17,6 @@ import java.util.ArrayList;
 
 import javax.swing.JFrame;
 
-
 import de.ueller.osmToGpsMid.model.Bounds;
 import de.ueller.osmToGpsMid.model.Node;
 

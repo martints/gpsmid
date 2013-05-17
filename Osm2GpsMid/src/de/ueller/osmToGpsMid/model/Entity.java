@@ -3,8 +3,8 @@ package de.ueller.osmToGpsMid.model;
 import java.util.Hashtable;
 import java.util.Set;
 
-import de.ueller.osmToGpsMid.SmallArrayMap;
 import de.ueller.osmToGpsMid.Configuration;
+import de.ueller.osmToGpsMid.SmallArrayMap;
 
 
 public class Entity extends SmallArrayMap<String,String> {

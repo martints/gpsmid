@@ -21,7 +21,7 @@ import java.util.Set;
  * @param <V>
  *
  */
-public class LongArrayMap<K extends Long, V> implements Map<Long, V> {
+public class LongArrayMap<V> implements Map<Long, V> {
 	
 		class LongArrayMapValueSet implements Set<V> {
 
@@ -29,9 +29,9 @@ public class LongArrayMap<K extends Long, V> implements Map<Long, V> {
 		 * @see java.util.Set#add(java.lang.Object)
 		 */
 		
-		private LongArrayMap<K,V> lam;	
+		private LongArrayMap<V> lam;	
 		
-		public LongArrayMapValueSet(LongArrayMap<K,V> lam) {
+		public LongArrayMapValueSet(LongArrayMap<V> lam) {
 			this.lam = lam;
 		}
 		@Override
@@ -43,7 +43,7 @@ public class LongArrayMap<K extends Long, V> implements Map<Long, V> {
 		 * @see java.util.Set#addAll(java.util.Collection)
 		 */
 		@Override
-		public boolean addAll(Collection c) {
+		public boolean addAll(Collection<? extends V> c) {
 			throw new Error("Function ValueSet.addAll is not implemented yet");
 		}
 
@@ -68,7 +68,7 @@ public class LongArrayMap<K extends Long, V> implements Map<Long, V> {
 		 * @see java.util.Set#containsAll(java.util.Collection)
 		 */
 		@Override
-		public boolean containsAll(Collection c) {
+		public boolean containsAll(Collection<?> c) {
 			throw new Error("Function ValueSet.containsAll is not implemented yet");
 		}
 
@@ -141,7 +141,7 @@ public class LongArrayMap<K extends Long, V> implements Map<Long, V> {
 		 * @see java.util.Set#removeAll(java.util.Collection)
 		 */
 		@Override
-		public boolean removeAll(Collection c) {
+		public boolean removeAll(Collection<?> c) {
 			throw new Error("Function ValueSet.removeAll is not implemented yet");			
 		}
 
@@ -149,7 +149,7 @@ public class LongArrayMap<K extends Long, V> implements Map<Long, V> {
 		 * @see java.util.Set#retainAll(java.util.Collection)
 		 */
 		@Override
-		public boolean retainAll(Collection c) {
+		public boolean retainAll(Collection<?> c) {
 			throw new Error("Function ValueSet.retainAll is not implemented yet");
 		}
 
@@ -173,7 +173,7 @@ public class LongArrayMap<K extends Long, V> implements Map<Long, V> {
 		 * @see java.util.Set#toArray(T[])
 		 */
 		@Override
-		public V[] toArray(Object[] a) {
+		public <V1> V1[] toArray(V1[] a) {
 			throw new Error("Function ValueSet.toArray2 is not implemented yet");
 		}
 		
@@ -182,7 +182,6 @@ public class LongArrayMap<K extends Long, V> implements Map<Long, V> {
 	private class LongArrayMapEntry<V> {
 		long [] keys;
 		Object[] values;
-		long minKey, maxKey;
 		int size;		
 		
 		public LongArrayMapEntry(int capacity) {

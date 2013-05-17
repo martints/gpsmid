@@ -3,11 +3,9 @@ package de.ueller.osmToGpsMid.model.name;
 
 import java.util.ArrayList;
 
-import de.ueller.osmToGpsMid.model.Entity;
-import de.ueller.osmToGpsMid.model.Node;
-import de.ueller.osmToGpsMid.model.Way;
-
 import de.ueller.osmToGpsMid.Configuration;
+import de.ueller.osmToGpsMid.model.Entity;
+import de.ueller.osmToGpsMid.model.Way;
 
 
 /**

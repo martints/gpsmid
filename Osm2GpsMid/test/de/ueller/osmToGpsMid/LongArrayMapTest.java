@@ -40,9 +40,9 @@ public class LongArrayMapTest extends TestCase {
 		}
 	}
 	
-	private LongArrayMap<Long, Long> populateLAM() {
+	private LongArrayMap<Long> populateLAM() {
 		System.out.println("Populating LAM");
-		LongArrayMap<Long, Long> lam = new LongArrayMap<Long, Long>(100);
+		LongArrayMap<Long> lam = new LongArrayMap<Long>(100);
 		genEntries();
 		for (int i = 0; i < entries.length; i++) {			
 			try {
@@ -74,7 +74,7 @@ public class LongArrayMapTest extends TestCase {
 	 */
 	public void testPut() {
 		System.out.println("Testing Put");
-		LongArrayMap<Long,Long> lam = new LongArrayMap<Long,Long>(100);
+		LongArrayMap<Long> lam = new LongArrayMap<Long>(100);
 		genEntries();
 		for (int i = 0; i < entries.length; i++) {			
 			try {
@@ -91,7 +91,7 @@ public class LongArrayMapTest extends TestCase {
 	 */
 	public void testGet() {
 		System.out.println("Testing Get");
-		LongArrayMap<Long,Long> lam = populateLAM();		
+		LongArrayMap<Long> lam = populateLAM();		
 		System.out.println("Testing getting of existing objects");
 		for (int i = 0; i < entries.length; i++) {
 			Long tmp = lam.get(new Long(entries[i]));
@@ -123,7 +123,7 @@ public class LongArrayMapTest extends TestCase {
 	 */
 	public void testContainsKey() {
 		System.out.println("Testing Contains Key");
-		LongArrayMap<Long,Long> lam = populateLAM();		
+		LongArrayMap<Long> lam = populateLAM();		
 		System.out.println("Testing of existing objects");
 		for (int i = 0; i < entries.length; i++) {
 			boolean tmp = lam.containsKey(new Long(entries[i]));
@@ -150,7 +150,7 @@ public class LongArrayMapTest extends TestCase {
 	 */
 	public void testContainsValue() {
 		System.out.println("Testing Contains Value");
-		LongArrayMap<Long,Long> lam = new LongArrayMap<Long,Long>(100);
+		LongArrayMap<Long> lam = new LongArrayMap<Long>(100);
 		genEntries();
 		Long [] values = new Long[entries.length];
 		for (int i = 0; i < entries.length; i++) {
@@ -169,7 +169,7 @@ public class LongArrayMapTest extends TestCase {
 	 */
 	public void testIsEmpty() {
 		System.out.println("Testing isEmpty");
-		LongArrayMap<Long,Long> lam = new LongArrayMap<Long,Long>(100);
+		LongArrayMap<Long> lam = new LongArrayMap<Long>(100);
 		assertTrue("A new Map should be empty.", lam.isEmpty());
 		genEntries();
 		for (int i = 0; i < entries.length; i++) {
@@ -185,7 +185,7 @@ public class LongArrayMapTest extends TestCase {
 	 */
 	public void testRemove() {
 		System.out.println("Testing Remove");
-		LongArrayMap<Long,Long> lam = populateLAM();
+		LongArrayMap<Long> lam = populateLAM();
 		Random r = new Random();		
 		for (int i = 0; i < entries.length; i++) {
 			if (r.nextInt(10) == 0) {
@@ -201,7 +201,7 @@ public class LongArrayMapTest extends TestCase {
 	 */
 	public void testSize() {
 		System.out.println("Testing Size");
-		LongArrayMap<Long,Long> lam = new LongArrayMap<Long,Long>(100);
+		LongArrayMap<Long> lam = new LongArrayMap<Long>(100);
 		assertEquals(0,lam.size());
 		genEntries();
 		for (int i = 0; i < entries.length; i++) {
@@ -218,7 +218,7 @@ public class LongArrayMapTest extends TestCase {
 	 */
 	public void testValueIterator() {
 		System.out.println("Testing Value iterator");
-		LongArrayMap<Long,Long> lam = populateLAM();
+		LongArrayMap<Long> lam = populateLAM();
 		int idx = 0;
 		for (Long l : lam.values()) {
 			assertEquals("Iterator did not return the correct values for idx=" + idx, entries[idx++], l.longValue());
@@ -238,7 +238,7 @@ public class LongArrayMapTest extends TestCase {
 	 */
 	public void testValueIteratorRemove() {
 		System.out.println("Testing Value iterator remove");
-		LongArrayMap<Long,Long> lam = populateLAM();
+		LongArrayMap<Long> lam = populateLAM();
 		int idx = 0;
 		Iterator<Long> it = lam.values().iterator();		
 		while (it.hasNext()) {

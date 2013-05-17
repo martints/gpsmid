@@ -10,8 +10,8 @@
 
 package de.ueller.osmToGpsMid;
 
-import java.util.ResourceBundle;
 import java.util.MissingResourceException;
+import java.util.ResourceBundle;
 
 public class GetText {
 	public static ResourceBundle myResources = null;

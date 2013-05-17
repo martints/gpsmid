@@ -15,13 +15,7 @@ import java.io.DataOutputStream;
 import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
 import java.io.IOException;
-import java.util.ArrayList;
 
-import de.ueller.osmToGpsMid.model.Entity;
-import de.ueller.osmToGpsMid.model.Node;
-import de.ueller.osmToGpsMid.model.Way;
-import de.ueller.osmToGpsMid.model.name.Name;
-import de.ueller.osmToGpsMid.model.name.Names;
 import de.ueller.osmToGpsMid.model.url.Url;
 import de.ueller.osmToGpsMid.model.url.Urls;
 

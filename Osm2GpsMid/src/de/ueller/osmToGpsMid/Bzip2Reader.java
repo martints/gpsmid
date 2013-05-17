@@ -30,31 +30,50 @@ public class Bzip2Reader extends PipedInputStream implements Runnable {
 	public Bzip2Reader(InputStream is){
 		super();
 		this.is = is;
-			processorThread = new Thread(this,"BZi2Reader");
-			processorThread.setPriority(Thread.NORM_PRIORITY+1);
-			processorThread.start();
-	}
+		processorThread = new Thread(this,"BZi2Reader");
+		processorThread.setPriority(Thread.NORM_PRIORITY+1);
+		processorThread.start();
+	}	
 
 	/* (non-Javadoc)
 	 * @see java.lang.Runnable#run()
 	 */
 	public void run() {
-		int ch;
 		byte[] buffer = new byte[512];
-		int bytes_read;
+		int bytes_read = 0;
+		CBZip2InputStream cis = null;
+		PipedOutputStream po = null;
 		try {
-			PipedOutputStream po=new PipedOutputStream(this);
+			po = new PipedOutputStream(this);
 			is.read();
 			is.read();
-			CBZip2InputStream cis = new CBZip2InputStream(new BufferedInputStream(is,10240));
-			 for(;;) {
+			cis = new CBZip2InputStream(new BufferedInputStream(is,10240));
+			 while (bytes_read >= 0) {
 		            bytes_read = cis.read(buffer);
-		            if (bytes_read == -1) { po.close(); return; }
-		            po.write(buffer, 0, bytes_read);
-		        }
-			 } catch (IOException e) {
+		            if (bytes_read > 0) {  
+		            	po.write(buffer, 0, bytes_read);
+		            }
+			 }
+		} catch (IOException e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
+		} finally {
+			if (po != null) {
+				try {
+					po.close();
+				} catch (IOException e) {
+					// TODO Auto-generated catch block
+					e.printStackTrace();
+				}
+			}
+			if (cis != null) {
+				try {
+					cis.close();
+				} catch (IOException e) {
+					// TODO Auto-generated catch block
+					e.printStackTrace();
+				}
+			}
 		}
 
 	}

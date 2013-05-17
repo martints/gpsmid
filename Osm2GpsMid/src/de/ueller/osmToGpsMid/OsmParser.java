@@ -11,9 +11,11 @@
 package de.ueller.osmToGpsMid;
 
 import java.io.InputStream;
+import java.text.DecimalFormat;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.HashMap;
+import java.util.Map;
 import java.util.Vector;
 
 import de.ueller.osmToGpsMid.model.Bounds;
@@ -23,8 +25,6 @@ import de.ueller.osmToGpsMid.model.Relation;
 import de.ueller.osmToGpsMid.model.Storage;
 import de.ueller.osmToGpsMid.model.TurnRestriction;
 import de.ueller.osmToGpsMid.model.Way;
-import java.text.DecimalFormat;
-import java.util.Map;
 
 public abstract class OsmParser {
 

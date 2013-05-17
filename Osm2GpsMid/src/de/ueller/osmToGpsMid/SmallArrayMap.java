@@ -11,13 +11,12 @@
 
 package de.ueller.osmToGpsMid;
 
-import java.util.Collection;
-import java.util.HashSet;
-import java.util.Map;
-import java.util.Set;
 import java.util.AbstractSet;
+import java.util.Collection;
 import java.util.Iterator;
+import java.util.Map;
 import java.util.NoSuchElementException;
+import java.util.Set;
 
 /**
  * This class implements a Map for small amounts of data by using an Array for 

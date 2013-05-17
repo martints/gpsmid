@@ -1,8 +1,6 @@
 package de.ueller.osmToGpsMid.model.name;
 
 import java.util.Hashtable;
-import java.lang.Object;
-import java.lang.Long;
 
 /**
  * @author jkpj

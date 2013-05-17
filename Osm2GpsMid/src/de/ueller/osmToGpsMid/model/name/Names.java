@@ -9,20 +9,18 @@
 package de.ueller.osmToGpsMid.model.name;
 
 import java.util.Collection;
-import java.util.LinkedHashMap;
 import java.util.Map;
-import java.util.SortedMap;
+import java.util.NoSuchElementException;
 import java.util.SortedSet;
 import java.util.TreeMap;
 import java.util.TreeSet;
-import java.util.NoSuchElementException;
 
+import de.ueller.osmToGpsMid.Configuration;
 import de.ueller.osmToGpsMid.model.Entity;
 import de.ueller.osmToGpsMid.model.Node;
-import de.ueller.osmToGpsMid.model.Way;
 import de.ueller.osmToGpsMid.model.POIdescription;
+import de.ueller.osmToGpsMid.model.Way;
 import de.ueller.osmToGpsMid.model.WayDescription;
-import de.ueller.osmToGpsMid.Configuration;
 
 
 /**
@@ -60,25 +58,25 @@ public class Names {
 	}
 
     private void addToCanon(TreeSet<Name> canon, String word, Entity w) {
-	if (word.length() == 0) {
-	    return;
-	}
-
-	Name mn = new Name(word);
-	if (! canon.add(mn)){
-	    Name mnNext = new Name(w.getName()+"\0");
-	    mnNext.setCanon(mn.getCanon());
-	    try {
-		SortedSet<Name> subSet = canon.tailSet(mnNext);
-		Name mnExist = subSet.first();
-		if (mnExist != null) {
-		    mnExist.addEntity(w);
+		if (word.length() == 0) {
+		    return;
 		}
-	    }
-	    catch (NoSuchElementException e) {
-//              System.out.println("no such element exc. in canons.add");
-	    }
-	}    
+	
+		Name mn = new Name(word);
+		if (! canon.add(mn)){
+		    Name mnNext = new Name(w.getName()+"\0");
+		    mnNext.setCanon(mn.getCanon());
+		    try {
+			SortedSet<Name> subSet = canon.tailSet(mnNext);
+			Name mnExist = subSet.first();
+			if (mnExist != null) {
+			    mnExist.addEntity(w);
+			}
+		    }
+		    catch (NoSuchElementException e) {
+	//              System.out.println("no such element exc. in canons.add");
+		    }
+		}    
     }
     
 	public void addName(Entity w, WayRedirect wayRedirect) {

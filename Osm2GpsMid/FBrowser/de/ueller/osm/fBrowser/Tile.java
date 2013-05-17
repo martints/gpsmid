@@ -4,16 +4,13 @@
  */
 package de.ueller.osm.fBrowser;
 
-import java.awt.Graphics;
+import java.awt.Graphics; 
 import java.awt.Point;
 import java.util.Enumeration;
-import java.util.Vector;
 
 import javax.swing.tree.TreeNode;
 
 import org.openstreetmap.gui.jmapviewer.Coordinate;
-import org.openstreetmap.gui.jmapviewer.JMapViewer;
-import org.openstreetmap.gui.jmapviewer.interfaces.MapMarker;
 import org.openstreetmap.gui.jmapviewer.interfaces.MapRectangle;
 
 
@@ -84,7 +81,7 @@ public abstract class Tile implements TreeNode, MapRectangle {
 	 * @see javax.swing.tree.TreeNode#children()
 	 */
 	@Override
-	public Enumeration children() {
+	public Enumeration<TreeNode> children() {
 		// TODO Auto-generated method stub
 		return null;
 	}
