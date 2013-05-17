@@ -13,6 +13,8 @@ import java.io.IOException;
 import java.io.InputStream;
 
 public class ThreadBufferedInputStream extends InputStream implements Runnable {
+	private static final int BUFFER_SIZE = 1024*1024;
+	
 	private InputStream is;
 	private byte[][] buffer;
 	private int bufferReadIdx;
@@ -29,8 +31,8 @@ public class ThreadBufferedInputStream extends InputStream implements Runnable {
 	public ThreadBufferedInputStream(InputStream in) {
 		is = in;
 		buffer = new byte[2][];
-		buffer[0] = new byte[1024 * 1024];
-		buffer[1] = new byte[1024 * 1024];
+		buffer[0] = new byte[BUFFER_SIZE];
+		buffer[1] = new byte[BUFFER_SIZE];
 		writeSwappReady = false;
 		readSwappReady = false;
 		bufferReadIdx = 0;
@@ -44,79 +46,45 @@ public class ThreadBufferedInputStream extends InputStream implements Runnable {
 		workerThread.start();
 	}
 	
+	private final boolean retrieveNextBuffer() {
+		synchronized (this) {
+			if (eof) {
+				return false;
+			}
+			readSwappReady = true;
+			if (writeSwappReady) {
+				swapBuffers();
+			}
+			else {
+				try {
+					wait();						
+				} catch (InterruptedException e) {
+					System.out.println("Something went horribly wrong " + e.getMessage());
+					System.exit(3);
+				}
+			}
+		}
+		return true;
+	}
+	
 	/* (non-Javadoc)
 	 * @see java.io.InputStream#read()
 	 */
 	@Override
 	public int read() throws IOException {
 		if (readLength <= readIdx ) {
-			synchronized (this) {
-				if (eof) {
-					return -1;
-				}
-				readSwappReady = true;
-				if (writeSwappReady) {
-					swapBuffers();
-				}
-				else {
-					try {
-						wait();						
-					} catch (InterruptedException e) {
-						System.out.println("Something went horribly wrong " + e.getMessage());
-						System.exit(3);
-					}
-				}
+			if (! retrieveNextBuffer()) {
+				return -1;
 			}
 		}
 		byte res = buffer[bufferReadIdx][readIdx++];
 		return res;
 	}
 	
-	public int read(byte[] buf) {
-		if (readLength <= readIdx ) {
-			synchronized (this) {
-				if (eof) {
-					return -1;
-				}
-				readSwappReady = true;				
-				if (writeSwappReady) {
-					swapBuffers();
-				} else {
-					try {
-						wait();						
-					} catch (InterruptedException e) {
-						System.out.println("Something went horribly wrong " + e.getMessage());
-						System.exit(3);
-					}
-				}
-			}
-		}
-		int noRead = buf.length;
-		if (noRead + readIdx > readLength) {
-			noRead = readLength - readIdx;
-		}
-		System.arraycopy(buffer[bufferReadIdx], readIdx, buf, 0, noRead);
-		readIdx += noRead;		
-		return noRead;
-	}
-	
 	public int read(byte[] buf, int off, int len) {
 		if (readLength <= readIdx ) {
-			synchronized (this) {
-				readSwappReady = true;
-				if (eof) {
-					return -1;
-				}
-				if (writeSwappReady)
-					swapBuffers();
-				else {
-					try {
-						wait();
-					} catch (InterruptedException e) {
-						System.out.println("Something went horribly wrong " + e.getMessage());
-						System.exit(3);
-					}
-				}
+			if (! retrieveNextBuffer()) {
+				return -1;
 			}
 		}
 		int noRead = len;
@@ -135,7 +103,7 @@ public class ThreadBufferedInputStream extends InputStream implements Runnable {
 		int noRead = 0;
 		while (noRead != -1) {
 			try {
-				noRead = is.read(buffer[bufferWriteIdx],writeIdx,buffer[bufferWriteIdx].length - writeIdx);
+				noRead = is.read(buffer[bufferWriteIdx],writeIdx,BUFFER_SIZE - writeIdx);
 				if (noRead == -1) {
 					eofIn = true;					
 					//System.out.println("finished reading is");					
@@ -148,7 +116,7 @@ public class ThreadBufferedInputStream extends InputStream implements Runnable {
 			if (!eofIn) {
 				writeIdx += noRead;
 			}
-			if (buffer[bufferWriteIdx].length <= writeIdx || eofIn) {
+			if (writeIdx >= BUFFER_SIZE || eofIn) {
 				synchronized (this) {
 					writeSwappReady = true;
 					if (readSwappReady) {
