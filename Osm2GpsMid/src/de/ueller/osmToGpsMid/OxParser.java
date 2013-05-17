@@ -53,29 +53,65 @@ public class OxParser extends OsmParser {
 					+ " seconds");
 		}
 
+		private final long parseLong(String s) {
+			long result = 0L;
+			int len = s.length();
+			for (int i = 0; i < len; i++) {
+				char ch = s.charAt(i);
+				if ((ch >= '0') && (ch <= '9')) {
+					result = result * 10L + (ch - '0');
+				} else {
+					throw new NumberFormatException("'" + s + "' is not a valid long");
+				}
+			}
+			return result;
+		}
+		
+		private final float parseFloat(String s) {
+			long result = 0L;
+			long point = 0L;
+			int len = s.length();
+			for (int i = 0; i < len; i++) {
+				char ch = s.charAt(i);
+				if ((ch >= '0') && (ch <= '9')) {
+					result = result * 10L + (ch - '0');
+					point *= 10;
+				} else if ((ch == '.') || (ch == ',')) {
+					point = 1;
+				} else {
+					throw new NumberFormatException("'" + s + "' is not a valid float (without exponent)");
+				}
+			}
+			if (point == 0L) {
+				return (float) result;
+			} else {
+				return (float)(((double)result) / ((double) point));
+			}
+		}
+		
 		@Override
 		public void startElement(String namespaceURI, String localName,
 				String qName, Attributes atts) {
 			// System.out.println("start " + localName + " " + qName);
 			if (qName.equals("node")) {
 				nodeTot++;
-				float node_lat = Float.parseFloat(atts.getValue("lat"));
-				float node_lon = Float.parseFloat(atts.getValue("lon"));
+				float node_lat = parseFloat(atts.getValue("lat"));
+				float node_lon = parseFloat(atts.getValue("lon"));
 
 				if (nodeInArea(node_lat, node_lon)) {
-					long id = Long.parseLong(atts.getValue("id"));
+					long id = parseLong(atts.getValue("id"));
 					current = new Node(node_lat, node_lon, id);
 				} else {
 					current = null;
 				}
 			} else if (qName.equals("way")) {
-				long id = Long.parseLong(atts.getValue("id"));
+				long id = parseLong(atts.getValue("id"));
 				current = new Way(id);
 				((Way) current).used = true;
 			} else if (qName.equals("nd")) {
 				if (current instanceof Way) {
 					Way way = ((Way) current);
-					long ref = Long.parseLong(atts.getValue("ref"));
+					long ref = parseLong(atts.getValue("ref"));
 					Node node = nodes.get(new Long(ref));
 					if (node != null) {
 						way.addNode(node);
@@ -134,7 +170,7 @@ public class OxParser extends OsmParser {
 					}
 				}
 			} else if (qName.equals("relation")) {
-				long id = Long.parseLong(atts.getValue("id"));
+				long id = parseLong(atts.getValue("id"));
 				current = new Relation(id);
 			} else if (qName.equals("member")) {
 				if (current instanceof Relation) {
