@@ -306,11 +306,6 @@ public class OpbfParser extends OsmParser {
 
 	private Node previousNodeWithThisId;
 
-	public OpbfParser(InputStream i) {
-		super(i);
-
-	}
-
 	public OpbfParser(InputStream i, Configuration c) {
 		super(i, c);
 

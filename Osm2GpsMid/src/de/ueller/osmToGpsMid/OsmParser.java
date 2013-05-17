@@ -10,7 +10,8 @@
  */
 package de.ueller.osmToGpsMid;
 
-import java.io.InputStream;
+import java.awt.geom.Area;
+import java.io.InputStream; 
 import java.text.DecimalFormat;
 import java.util.ArrayList;
 import java.util.Collection;
@@ -72,16 +73,6 @@ public abstract class OsmParser {
 	private Configuration configuration;
 	
 	protected int wayIns;
-
-	/**
-	 * @param i
-	 *            InputStream from which planet file is read
-	 */
-	public OsmParser(InputStream i) {
-		System.out.println(parserType() + " parser started...");
-		configuration = new Configuration();
-		init(i);
-	}
 
 	/**
 	 * @param i

@@ -415,14 +415,6 @@ public class OxParser extends OsmParser {
 	/**
 	 * @param i
 	 *            InputStream from which planet file is read
-	 */
-	public OxParser(InputStream i) {
-		super(i);
-	}
-
-	/**
-	 * @param i
-	 *            InputStream from which planet file is read
 	 * @param c
 	 *            Configuration which supplies the bounds
 	 */
