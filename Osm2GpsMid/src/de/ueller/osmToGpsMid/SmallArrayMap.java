@@ -13,6 +13,7 @@ package de.ueller.osmToGpsMid;
 
 import java.util.AbstractSet;
 import java.util.Collection;
+import java.util.Collections;
 import java.util.Iterator;
 import java.util.Map;
 import java.util.NoSuchElementException;
@@ -74,7 +75,41 @@ public class SmallArrayMap<K, V> implements Map<K, V> {
 	 */
 	@Override
 	public Set<java.util.Map.Entry<K, V>> entrySet() {
-		throw new Error("Method not implemented");
+	    return new InnerSet<java.util.Map.Entry<K, V>>() {
+			protected java.util.Map.Entry<K, V> get(int i) {
+			    class Entry 
+			    		implements java.util.Map.Entry<K, V> {
+			    	private final int i;
+			    	
+			    	Entry(int i) {
+			    		this.i = i;
+			    	}
+
+					@SuppressWarnings("unchecked")
+					@Override
+					public K getKey() {
+						return (K) mapArray[2 * i];
+					}
+
+					@SuppressWarnings("unchecked")
+					@Override
+					public V getValue() {
+						return (V) mapArray[2 * i + 1];
+					}
+
+					@SuppressWarnings("unchecked")
+					@Override
+					public V setValue(V value) {
+						V old = (V) mapArray[2 * i + 1];
+						mapArray[2 * i + 1] = value;
+						return old;
+					}
+			    };
+			    
+			    return new Entry(i);
+			}
+		  
+	    };
 	}
 
 	/* (non-Javadoc)
@@ -113,13 +148,10 @@ public class SmallArrayMap<K, V> implements Map<K, V> {
 	@Override
 	public Set<K> keySet() {
 	    return new InnerSet<K>() {
-		public int size() {
-		    return SmallArrayMap.this.size();
-		}
-
-		protected K get(int i) {
-		    return (K) mapArray[2*i];
-		}
+			@SuppressWarnings("unchecked")
+			protected K get(int i) {
+			    return (K) mapArray[2*i];
+			}
 		  
 	    };
 	}
@@ -127,6 +159,7 @@ public class SmallArrayMap<K, V> implements Map<K, V> {
 	/* (non-Javadoc)
 	 * @see java.util.Map#put(java.lang.Object, java.lang.Object)
 	 */
+	@SuppressWarnings("unchecked")
 	@Override
 	public V put(K key, V value) {
 		if ( mapArray == null ) {
@@ -201,44 +234,49 @@ public class SmallArrayMap<K, V> implements Map<K, V> {
 	@Override
 	public Collection<V> values() {
 	    return new InnerSet<V>() {
-		public int size() {
-		    return SmallArrayMap.this.size();
-		}
-
-		protected V get(int i) {
-		    return (V) mapArray[2*i + 1];
-		}
+			protected V get(int i) {
+			    return (V) mapArray[2*i + 1];
+			}
 		  
 	    };
 	}
 
-	private static abstract class InnerSet<E extends Object> 
+	private abstract class InnerSet<E extends Object> 
 	    extends AbstractSet<E>
 	    implements Set<E> {
 
 	    protected abstract E get(int i);
 
-	    public abstract int size();
+	    public int size() {
+	    	if (mapArray == null) {
+	    		return 0; 
+	    	} else {
+	    		return mapArray.length / 2;
+	    	}
+	    }
 	 
 	    public Iterator<E> iterator() {
-		return new Iterator<E>() {
-		    private int pos = 0;
-
-		    public E next() {
-			if (pos >= size()) {
-			    throw new NoSuchElementException();
-			}
-			return get(pos ++);
-		    }
-
-		    public boolean hasNext() {
-			return pos < size();
-		    }
-
-		    public void remove() {
-			throw new Error("Cannot modify the set ... ");
-		    }
-		};
+	    	if (size() == 0) {
+	    		return Collections.emptyIterator();
+	    	}
+			return new Iterator<E>() {
+			    private int pos = 0;
+	
+			    public E next() {
+				if (pos >= size()) {
+				    throw new NoSuchElementException();
+				}
+				return get(pos ++);
+			    }
+	
+			    public boolean hasNext() {
+			    	return pos < mapArray.length / 2;
+			    }
+	
+			    public void remove() {
+				throw new Error("Cannot modify the set ... ");
+			    }
+			};
 	    }
 	}
 }
