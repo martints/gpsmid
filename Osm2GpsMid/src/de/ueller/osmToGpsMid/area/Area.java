@@ -10,7 +10,7 @@
 
 package de.ueller.osmToGpsMid.area;
 
-import java.util.ArrayList;
+import java.util.ArrayList; 
 import java.util.Comparator;
 import java.util.Iterator;
 import java.util.LinkedList;
@@ -22,13 +22,12 @@ import de.ueller.osmToGpsMid.model.Bounds;
 import de.ueller.osmToGpsMid.model.Node;
 
 public class Area {
+	public static final boolean DEBUG = false;
+
 	private List<Outline>	outlineList	= new ArrayList<Outline>();
 	private List<Outline>	holeList	= new ArrayList<Outline>();
-	public Triangle			triangle;
 	ArrayList<Triangle> triangleList = null;
 	static DebugViewer			viewer		= null;
-	public Vertex	edgeInside;
-	public  boolean debug = false;
 
 	public double maxdist = 0d;
 	//double limitdist = 25000d;
@@ -55,13 +54,15 @@ public class Area {
 		List<Outline> outlineTempList = new LinkedList<Outline>();
 		while (!src.isEmpty()) {
 			Outline outline = src.remove(0);
-			if (debug) {
+			if (DEBUG) {
 				viewer.setActiveOutline(outline);
 			}
 			if (!outline.isClosed()) {
 				outline.connectPartWays(src);
 			}
-			if (outline.isClosed()) {
+			// use only closed and valid (i.e. more than two points) outlines
+			if (outline.isClosed() && outline.isValid()) {
+				outline.calcNextPrev();
 				outlineTempList.add(outline);
 			}
 		}
@@ -69,7 +70,7 @@ public class Area {
 	}
 	
 	public ArrayList<Triangle> triangulate() {
-		if (debug) {
+		if (DEBUG) {
 			if (viewer == null) {
 				viewer = new DebugViewer(this);
 			} else {
@@ -88,7 +89,7 @@ public class Area {
 		int loop = 0;
 		while (outlineList.size() > 0) {
 			Outline outline = outlineList.remove(0);
-			if (debug) {
+			if (DEBUG) {
 				viewer.setActiveOutline(outline);
 			}
 			
@@ -98,7 +99,8 @@ public class Area {
 
 			outline.calcNextPrev();
 			//System.err.println("Starting to do the cutOneEar thing");
-			while (outline.vertexCount() > 2) {
+			while ((outline.vertexCount() > 3)
+						|| ((outline.vertexCount() > 2) && !holeList.isEmpty())) {
 				loop++;
 				if (loop % 5000 == 0) {
 					System.err.println("Triangulating outline "
@@ -113,6 +115,11 @@ public class Area {
 				Triangle t = cutOneEar(outline, holeList, dir);
 				splitTriangleIfNeeded(t, ret, 0);
 				dir = (dir + 1) % 4;
+			}
+			if (outline.vertexCount() == 3) {
+				List<Vertex> v = outline.getVertexList();
+				Triangle t = new Triangle(v.get(0), v.get(1), v.get(2));
+				splitTriangleIfNeeded(t, ret, 0);
 			}
 			//System.err.println("Finished doing the cutOneEar thing");
 		}
@@ -216,8 +223,8 @@ public class Area {
 	/**
 	 * 
 	 */
-	private void repaint() {
-		if (debug) {
+	private final void repaint() {
+		if (DEBUG) {
 			if (viewer == null) {
 				viewer = DebugViewer.getInstanz(this);
 			} else {
@@ -236,122 +243,119 @@ public class Area {
 	}
 
 	private Triangle cutOneEar(Outline outline, List<Outline> holeList, int dir) {
-		//List<Vertex> orderedOutline = outline.getOrdered(dir);
-		Vertex orderedOutlineMin = outline.getMin(dir);
+		Vertex n = outline.getMin(dir);
 		while (true) {
-			Vertex n = orderedOutlineMin;
-			triangle = new Triangle(n, n.getNext(), n.getPrev());
-			edgeInside = findEdgeInside(outline, triangle,dir);
-			repaint();
-			if (edgeInside == null) {
+			Triangle triangle = new Triangle(n, n.getNext(), n.getPrev());
+			Vertex vertexInside = findFirstVertexInside(outline, triangle, dir);
+			if (DEBUG) {
+				viewer.setCurrentPosition(triangle, vertexInside);
+				
+				repaint();
+			}
+			
+			if (vertexInside == null) {
 				// this is an ear with nothing in it so cut the ear
 				outline.remove(n);
 				return triangle;
+				
+			// at least one edge is inside this ear. Is it from the outline,
+		    // that is is the outline intersecting itself?
+			} else if (vertexInside.partOf(outline)) {
+				
+				// node of the outline is in the ear so we have to cut the outline into two parts
+				// one will handled now and the other goes to the stack
+				outline.clean();
+				Vertex nt = n;
+				// create a fresh copy of the old outline starting from outer edge of the expected ear
+				while (nt != vertexInside) {
+					outline.append(nt);
+					nt = nt.getNext();
+				}
+				// go ahead the edge that was found inside the test triangle
+				outline.append(vertexInside);
+				Outline newOutline = new Outline();
+				newOutline.setWayId(outline.getWayId());
+				while (nt != n) {
+					newOutline.append(nt);
+					nt = nt.getNext();
+				}
+				newOutline.append(n);
+				if (newOutline.isValid()) {
+					addOutline(newOutline);
+					newOutline.calcNextPrev();
+				}
+				
+				// reinititialize outline;
+				outline.calcNextPrev();			
+			// The Vertex is from some hole, connect the hole to the
+			// outline and continue
 			} else {
-				boolean handled = false;
-				// at least one edge is inside this ear
-				if (edgeInside.partOf(outline)) {
-					handled = true;
-					// node of the outline is in the ear so we have to cut the outline into two parts
-					// one will handled now and the other goes to the stack
-					outline.clean();
-					Vertex nt = n;
-					// create a fresh copy of the old outline starting from outer edge of the expected ear
-					while (nt != edgeInside) {
+				Outline hole = vertexInside.getOutline();
+				if (! hole.getVertexList().contains(vertexInside)) {
+					throw new RuntimeException("The internal state is broken!");
+				}
+				// now we have an edge of a hole inside the rectangle
+				// lets join the hole with the outline and have a next try
+				repaint();
+				// reinititialize outline;
+				outline.calcNextPrev();
+				boolean clockWise = outline.isClockWiseFast();
+				outline.clean();
+				Vertex nt = n;
+				if (clockWise) {
+					do {
 						outline.append(nt);
 						nt = nt.getNext();
-					}
-					// go ahead the edge that was found inside the test triangle
-					outline.append(edgeInside);
-					Outline newOutline = new Outline();
-					newOutline.setWayId(outline.getWayId());
-					while (nt != n) {
-						newOutline.append(nt);
-						nt = nt.getNext();
-					}
-					newOutline.append(n);
-					if (newOutline.isValid()) {
-						addOutline(newOutline);
-					}
-					// reinititalisize outline;
-					outline.calcNextPrev();
-					//orderedOutline = outline.getOrdered(dir);
-					orderedOutlineMin = outline.getMin(dir);
+					} while (nt != n);
 				} else {
-					for (Outline p : holeList) {
-						if (edgeInside.partOf(p)) {
-							// now we have an edge of a hole inside the rectangle
-							// lets join the hole with the outline and have a next try
-//							Outline hole = edgeInside.getOutline();
-							Outline hole = p;
-							if (hole != edgeInside.getOutline()) {
-								System.out.println("Warning: something wrong with internal data!");
-							}
-							hole.calcNextPrev();
-							repaint();
-//							Outline newOutline = new Outline();
-							Vertex nt = n;
-							boolean clockWise = outline.isClockWiseFast();
-							outline.clean();
-							do {
-								outline.append(nt);
-								if (clockWise) {
-									nt = nt.getNext();
-								} else {
-									nt = nt.getPrev();
-								}
-							} while (nt != n);
-							repaint();
-							outline.append(n.clone());
-							repaint();
-							nt = edgeInside;
-							// the following makes triangulation
-							// of Finnish sea fail after 75 000 triangles with:
-
-							/* Triangulating outline 4611686018427401182 looped 75000 times
-							   Something went wrong when trying to triangulate relation 
-							    http://www.openstreetmap.org/browse/relation/4611686018427388922 I'll attempt to ignore this relation
-							java.util.NoSuchElementException
-							    at java.util.ArrayList$Itr.next(ArrayList.java:757)
-							    at java.util.Collections.min(Collections.java:624)
-							    at de.ueller.osmToGpsMid.area.Outline.getLonMin(Outline.java:174)
-							    at de.ueller.osmToGpsMid.area.Outline.isClockWiseFast(Outline.java:290)
-							    at de.ueller.osmToGpsMid.area.Area.cutOneEar(Area.java:326)
-							    at de.ueller.osmToGpsMid.area.Area.triangulate(Area.java:131)
-							    at de.ueller.osmToGpsMid.Relations.processRelations(Relations.java:316)
-							    at de.ueller.osmToGpsMid.Relations.<init>(Relations.java:48)
-							    at de.ueller.osmToGpsMid.BundleGpsMid.run(BundleGpsMid.java:516)
-							    at java.lang.Thread.run(Thread.java:679) */
-
-							//clockWise = hole.isClockWiseFast();
-							clockWise = hole.isClockWise();
-							do {
-								outline.append(nt);
-								if (clockWise) {
-									nt = nt.getPrev();
-								} else {
-									nt = nt.getNext();
-								}
-//								repaint();
-							} while (nt != edgeInside);
-							outline.append(edgeInside.clone());
-							holeList.remove(hole);
-							outline.calcNextPrev();
-							//orderedOutline = outline.getOrdered(dir);
-							orderedOutlineMin = outline.getMin(dir);
-							handled = true;
-							break; // we found the hole so break this for loop
-						}
-					}
-					if (!handled) {
-						System.err.println("Something strange happened, there is an edge inside, but the member outline "
-								+ edgeInside.getOutline().getWayId() + " wasn't found");
-						System.err.println("  see http://www.openstreetmap.org/?node=" + edgeInside.getId());
-	//					debug = true;
-	//					repaint();
-						return triangle;
-					}
+					do {
+						outline.append(nt);
+						nt = nt.getPrev();
+					} while (nt != n);
 				}
+				repaint();
+				outline.append(n.clone());
+				repaint();
+				// the following makes triangulation
+				// of Finnish sea fail after 75 000 triangles with:
+
+				/* Triangulating outline 4611686018427401182 looped 75000 times
+				   Something went wrong when trying to triangulate relation 
+				   http://www.openstreetmap.org/browse/relation/4611686018427388922 I'll attempt to ignore this relation
+				      java.util.NoSuchElementException
+				   at java.util.ArrayList$Itr.next(ArrayList.java:757)
+				   at java.util.Collections.min(Collections.java:624)
+				   at de.ueller.osmToGpsMid.area.Outline.getLonMin(Outline.java:174)
+				   at de.ueller.osmToGpsMid.area.Outline.isClockWiseFast(Outline.java:290)
+				   at de.ueller.osmToGpsMid.area.Area.cutOneEar(Area.java:326)
+				   at de.ueller.osmToGpsMid.area.Area.triangulate(Area.java:131)
+				   at de.ueller.osmToGpsMid.Relations.processRelations(Relations.java:316)
+				   at de.ueller.osmToGpsMid.Relations.<init>(Relations.java:48)
+				   at de.ueller.osmToGpsMid.BundleGpsMid.run(BundleGpsMid.java:516)
+				   at java.lang.Thread.run(Thread.java:679) */
+
+				//clockWise = hole.isClockWiseFast();
+				hole.calcNextPrev();
+				nt = vertexInside;
+				if (hole.isClockWise()) {
+					do {
+						outline.append(nt);
+						nt = nt.getPrev();
+						// repaint();
+					} while (nt != vertexInside);
+				} else {
+					do {
+						outline.append(nt);
+						nt = nt.getNext();
+						// repaint();
+					} while (nt != vertexInside);
+					
+				}
+				outline.append(vertexInside.clone());
+				holeList.remove(hole);
+				
+				// reinititialize outline;
+				outline.calcNextPrev();
 			}
 		}
 	}
@@ -379,17 +383,17 @@ public class Area {
 //		return leftmost;
 //	}
 
-	private Vertex findEdgeInside(Outline outline, Triangle triangle, int dir) {
-   	        Comparator<Vertex> comp;
+	private Vertex findFirstVertexInside(Outline outline, Triangle triangle, int dir) {
+		Comparator<Vertex> comp;
 		switch (dir) {
 		case 0:
-			    comp = new DirectionComperator0();
+			    comp = DirectionComperator0.INSTANCE;
 		case 1:
-			    comp = new DirectionComperator1();
+			    comp = DirectionComperator1.INSTANCE;
 		case 2:
-			    comp = new DirectionComperator2();
+			    comp = DirectionComperator2.INSTANCE;
 		default:
-			    comp = new DirectionComperatorX();
+			    comp = DirectionComperatorX.INSTANCE;
 		}
 
 		Vertex ret = outline.findFirstVertexInside(triangle, comp, null);

@@ -33,6 +33,8 @@ public class DebugViewer extends JFrame {
 	float ox,oy;
 	public ArrayList<Triangle> alt=null;
 	private Outline activeOutline = null;
+	private Triangle currentTriangle = null;
+	private Vertex currentInsideVertex = null;
 	static DebugViewer instanz=null;
 	
 	public static DebugViewer getInstanz(Area a){
@@ -91,16 +93,16 @@ public class DebugViewer extends JFrame {
 			for (Triangle t:a.triangleList){
 				drawTriangle(g2, t, cf, co);
 			}
-			if (a.triangle != null){
-				drawTriangle(g2, a.triangle, new Color(255,0,0,40), Color.RED);
+			if (currentTriangle != null){
+				drawTriangle(g2, currentTriangle, new Color(255,0,0,40), Color.RED);
 			}
 			Color cAlt = new Color(255,255,0,40);
 			if (alt != null){
 			for (Triangle t:alt){
 				drawTriangle(g2, t, cAlt, co);
 			}
-			if (a.edgeInside != null){
-				Point ei=toScreen(a.edgeInside.getNode());
+			if (currentInsideVertex != null){
+				Point ei=toScreen(currentInsideVertex.getNode());
 				g2.setColor(Color.magenta);
 				g2.drawString("*", ei.x, ei.y);
 			}
@@ -201,6 +203,11 @@ public class DebugViewer extends JFrame {
 
 	public void setActiveOutline(Outline outline) {
 		activeOutline = outline;
+	}
+	
+	public void setCurrentPosition(Triangle triangle, Vertex vertexInside) {
+		currentTriangle = triangle;
+		currentInsideVertex = vertexInside;
 	}
 	
 	
