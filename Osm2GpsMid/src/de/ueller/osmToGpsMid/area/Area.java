@@ -13,6 +13,8 @@ package de.ueller.osmToGpsMid.area;
 import java.util.ArrayList;
 import java.util.Comparator;
 import java.util.Iterator;
+import java.util.LinkedList;
+import java.util.List;
 
 import uk.me.parabola.mkgmap.reader.osm.FakeIdGenerator;
 import de.ueller.osmToGpsMid.MyMath;
@@ -20,8 +22,8 @@ import de.ueller.osmToGpsMid.model.Bounds;
 import de.ueller.osmToGpsMid.model.Node;
 
 public class Area {
-	private ArrayList<Outline>	outlineList	= new ArrayList<Outline>();
-	private ArrayList<Outline>	holeList	= new ArrayList<Outline>();
+	private List<Outline>	outlineList	= new ArrayList<Outline>();
+	private List<Outline>	holeList	= new ArrayList<Outline>();
 	public Triangle			triangle;
 	ArrayList<Triangle> triangleList = null;
 	static DebugViewer			viewer		= null;
@@ -49,12 +51,23 @@ public class Area {
 		}
 	}
 
-	public void clean() {
-		outlineList = new ArrayList<Outline>();
-		holeList = new ArrayList<Outline>();
-		// tri = new ArrayList<Triangle>();
+	private List<Outline> cleanupOutlines(List<Outline> src) {
+		List<Outline> outlineTempList = new LinkedList<Outline>();
+		while (!src.isEmpty()) {
+			Outline outline = src.remove(0);
+			if (debug) {
+				viewer.setActiveOutline(outline);
+			}
+			if (!outline.isClosed()) {
+				outline.connectPartWays(src);
+			}
+			if (outline.isClosed()) {
+				outlineTempList.add(outline);
+			}
+		}
+		return outlineTempList;
 	}
-
+	
 	public ArrayList<Triangle> triangulate() {
 		if (debug) {
 			if (viewer == null) {
@@ -64,33 +77,9 @@ public class Area {
 			}
 		}
 		// if there are more ways than one are used to build the outline, try to construct one outline for that
-		ArrayList<Outline>	outlineTempList = new ArrayList<Outline>();
-		while (outlineList.size() > 0) {
-			Outline outline = outlineList.get(0);
-			if (!outline.isClosed()) {
-				outline.connectPartWays(outlineList);
-			}
-			if (outline.isClosed()) {
-				outlineTempList.add(outline);
-			}
-			outlineList.remove(0);
-		}
-		outlineList = outlineTempList;
+		outlineList = cleanupOutlines(outlineList);
 		// the same for the holes
-		outlineTempList = new ArrayList<Outline>();
-		//System.err.println("Starting to connect part ways");
-		while (holeList.size() > 0) {
-			Outline outline = holeList.get(0);
-			if (!outline.isClosed()) {
-				outline.connectPartWays(holeList);
-			}
-			if (outline.isClosed()) {
-				outlineTempList.add(outline);
-			}
-			holeList.remove(0);
-		}
-		//System.err.println("Finished connecting part ways");
-		holeList = outlineTempList;
+		holeList = cleanupOutlines(holeList);
 		
 		int dir = 0;
 		ArrayList<Triangle> ret = new ArrayList<Triangle>(1);
@@ -98,15 +87,16 @@ public class Area {
 		repaint();
 		int loop = 0;
 		while (outlineList.size() > 0) {
-			Outline outline = outlineList.get(0);
+			Outline outline = outlineList.remove(0);
+			if (debug) {
+				viewer.setActiveOutline(outline);
+			}
 			
 			if (! outline.isValid()) {
-				outlineList.remove(0);
 				continue;
 			}
 
 			outline.calcNextPrev();
-			outlineList.remove(0);
 			//System.err.println("Starting to do the cutOneEar thing");
 			while (outline.vertexCount() > 2) {
 				loop++;
@@ -245,7 +235,7 @@ public class Area {
 		}
 	}
 
-	private Triangle cutOneEar(Outline outline, ArrayList<Outline> holeList, int dir) {
+	private Triangle cutOneEar(Outline outline, List<Outline> holeList, int dir) {
 		//List<Vertex> orderedOutline = outline.getOrdered(dir);
 		Vertex orderedOutlineMin = outline.getMin(dir);
 		while (true) {
@@ -428,11 +418,11 @@ public class Area {
 		return b;
 	}
 	
-	public ArrayList<Outline> getOutlineList() {
+	public List<Outline> getOutlineList() {
 		return outlineList;
 	}
 
-	public ArrayList<Outline> getHoleList() {
+	public List<Outline> getHoleList() {
 		return holeList;
 	}
 

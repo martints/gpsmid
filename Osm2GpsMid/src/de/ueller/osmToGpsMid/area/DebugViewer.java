@@ -32,6 +32,7 @@ public class DebugViewer extends JFrame {
 	float f;
 	float ox,oy;
 	public ArrayList<Triangle> alt=null;
+	private Outline activeOutline = null;
 	static DebugViewer instanz=null;
 	
 	public static DebugViewer getInstanz(Area a){
@@ -81,7 +82,9 @@ public class DebugViewer extends JFrame {
 				drawOutline(g2, o,0);
 			}
 			g2.setColor(Color.cyan);
-			drawOutline(g2, a.outline,0);
+			if (activeOutline != null) {
+				drawOutline(g2, activeOutline,0);
+			}
 //		drawOutline(g2, a.outline,400);
 			Color cf = new Color(0,255,0,50);		
 			Color co = Color.BLACK;
@@ -194,6 +197,10 @@ public class DebugViewer extends JFrame {
 		}
 		ox=b.minLat;
 		oy=b.minLon;
+	}
+
+	public void setActiveOutline(Outline outline) {
+		activeOutline = outline;
 	}
 	
 	

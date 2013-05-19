@@ -15,6 +15,7 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Comparator;
 import java.util.Iterator;
+import java.util.List;
 
 import de.ueller.osmToGpsMid.model.Bounds;
 import de.ueller.osmToGpsMid.model.Node;
@@ -71,7 +72,7 @@ public class Outline {
 		return false;
 	}
 	
-	public void connectPartWays(ArrayList<Outline> others) {
+	public void connectPartWays(List<Outline> others) {
 		boolean changed = false;
 //		System.out.println("Entering connectPartWays");
 		do {
@@ -145,8 +146,9 @@ public class Outline {
 		if (vertexList.size() < 3) {
 			// this is a degenerated polygon make it empty
 			vertexList.clear();
+			return;
 		}
-		for (Vertex v:vertexList) {
+		for (Vertex v : vertexList) {
 			v.setOutline(this);
 			if (first == null) {
 				first = v;
@@ -278,11 +280,16 @@ public class Outline {
 //	}
 	
 	/**
-	 * Check if this outline (polygone) is clockwise. Therfore we get the leftmost vertex and the
-	 * booth neighbors. This edge must be convex. 
+	 * Check if this outline (polygon) is clockwise. Therefore we get the leftmost vertex and the
+	 * both neighbors. This edge must be convex. 
 	 * @return
 	 */
 	public boolean isClockWise() {
+		// Nothing to do for an empty outline
+		if (vertexList.isEmpty()) {
+			return true;
+		}
+		
 		calcNextPrev();
 		Vertex v = getLonMin();
 		Vertex vp = v.getPrev();
@@ -294,11 +301,15 @@ public class Outline {
 		}
 	}
 	/**
-	 * Check if this outline (polygone) is clockwise. Therfore we get the leftmost vertex and the
-	 * booth neighbors. This edge must be convex. 
+	 * Check if this outline (polygon) is clockwise. Therefore we get the leftmost vertex and the
+	 * both neighbors. This edge must be convex. 
 	 * @return
 	 */
 	public boolean isClockWiseFast() {
+		// Nothing to do for an empty outline
+		if (vertexList.isEmpty()) {
+			return true;
+		}
 		//calcNextPrev();
 		Vertex v = getLonMin();
 		Vertex vp = v.getPrev();
