@@ -482,9 +482,20 @@ public class Configuration {
 		public Hashtable<String, Boolean> getRelationExpansions() {
 			return legend.getRelationExpansions();
 		}
+		
+		public boolean isRelationExpanded(String string) {
+			Boolean res = getRelationExpansions().get(string);
+			return ((res != null) && res);
+		}
+
 
 		public Hashtable<String, Boolean> getRelationExpansionsCombine() {
 			return legend.getRelationExpansionsCombine();
+		}
+
+		public boolean isCombinedRelationExpanded(String string) {
+			Boolean res = getRelationExpansionsCombine().get(string);
+			return ((res != null) && res);
 		}
 
 		/** Singleton getter */
@@ -1663,4 +1674,5 @@ public class Configuration {
 			// TODO Auto-generated method stub
 			
 		}
+
 }
