@@ -16,6 +16,7 @@ import java.text.DecimalFormat;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 import java.util.Vector;
 
@@ -60,13 +61,12 @@ public abstract class OsmParser {
 	 * Maps id to already read nodes. Key: Long Value: Node
 	 */
 	//protected HashMap<Long, Node> nodes = new HashMap<Long, Node>(80000, 0.60f);
-	private Storage<Node> nodesStorage = new Storage<Node>(new NodeHash());
+	protected final Storage<Node> nodesStorage = new Storage<Node>(new NodeHash());
     protected Map<Long, Node> nodes = nodesStorage.foreignKey(new Id2EntityHash());
-	protected Vector<Node> nodes2 = null;
 	protected HashMap<Long, Way> ways = new HashMap<Long, Way>();
 	protected HashMap<Long, Relation> relations = new HashMap<Long, Relation>();
 	protected HashMap<Long, TurnRestriction> turnRestrictions = new HashMap<Long, TurnRestriction>();
-	protected ArrayList<TurnRestriction> turnRestrictionsWithViaWays = new ArrayList<TurnRestriction>();
+	protected List<TurnRestriction> turnRestrictionsWithViaWays = new ArrayList<TurnRestriction>();
 	private Node[] delayingNodes;
 	public int trafficSignalCount = 0;
 	private final Bounds[] bounds;
@@ -210,11 +210,7 @@ public abstract class OsmParser {
 	}
 
 	public Collection<Node> getNodes() {
-		if (nodes == null) {
-			return nodes2;
-		} else {
-			return nodes.values();
-		}
+		return nodesStorage;
 	}
 	
 	/**
@@ -249,7 +245,7 @@ public abstract class OsmParser {
 		delayingNodes = nodes;
 	}
 
-	public ArrayList<TurnRestriction> getTurnRestrictionsWithViaWays() {
+	public List<TurnRestriction> getTurnRestrictionsWithViaWays() {
 		return turnRestrictionsWithViaWays;
 	}
 
@@ -258,15 +254,8 @@ public abstract class OsmParser {
 	}
 
 	public void removeNodes(Collection<Node> nds) {
-		if (nodes == null) {
-			// This operation appears rather slow,
-			// so try and avoid calling remove nodes once it is in the nodes2
-			// format
-			nodes2.removeAll(nds);
-		} else {
-			for (Node n : nds) {
-				nodes.remove(new Long(n.id));
-			}
+		for (Node n : nds) {
+			nodes.remove(new Long(n.id));
 		}
 	}
 
@@ -277,21 +266,11 @@ public abstract class OsmParser {
 		//System.gc();
 		//System.out.println("Free memory: " + Runtime.getRuntime().freeMemory());
 		System.out.println("Resizing nodes HashMap");
-		if (nodes == null) {
-			nodes2 = new Vector<Node>(nodes2);
-		} else {
-			//nodes = new HashMap<Long, Node>(nodes);
-			 nodesStorage.shrink(0.85f);
-		}
+		nodesStorage.shrink(0.85f);
 		relations = new HashMap<Long, Relation>(relations);
 		//System.gc();
 		//System.out.println("Free memory: " + Runtime.getRuntime().freeMemory());
 		printMemoryUsage(1);
-	}
-
-	public void dropHashMap() {
-		nodes2 = new Vector<Node>(nodes.values());
-		nodes = null;
 	}
 
 	/**

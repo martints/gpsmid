@@ -36,7 +36,6 @@ public class CleanUpData {
 		removeEmptyWays();
 		removeDupNodes();
 		removeUnusedNodes();
-		parser.dropHashMap();
 		parser.resize();
 		System.out.println("Remaining after cleanup:");
 		System.out.println("  Nodes: " + parser.getNodes().size());
@@ -189,7 +188,7 @@ public class CleanUpData {
 	private void removeUnusedNodes() {
 		long startTime = System.currentTimeMillis();
 
-		for (Node n:parser.getNodes()) {
+		for (Node n : parser.getNodes()) {
 			if (n.getType(conf) < 0 ) {
 				n.used = false;
 			} else {
