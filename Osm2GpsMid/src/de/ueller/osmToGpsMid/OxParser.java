@@ -228,7 +228,7 @@ public class OxParser extends OsmParser {
 					return; // Node not in bound
 				}
 				Node n = (Node) current;
-				previousNodeWithThisId = nodes.put(n.id, n);
+				Node previousNodeWithThisId = nodes.put(n.id, n);
 				nodeIns++;
 				if ("traffic_signals".equalsIgnoreCase(current.getAttribute("highway"))) {
 					// decrement trafficSignalCount if a previous node with this
@@ -406,8 +406,6 @@ public class OxParser extends OsmParser {
 	 */
 	private LinkedList<Way> duplicateWays;
 	private long startTime;
-
-	private Node previousNodeWithThisId;
 
 	private ForwardInputStream forwardInputStream = null;
 	private long lLastStatusTime = 0;
