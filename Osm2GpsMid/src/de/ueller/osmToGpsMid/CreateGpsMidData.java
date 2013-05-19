@@ -1632,10 +1632,10 @@ public class CreateGpsMidData implements FilenameFilter {
 			}
 		}
 
-		// Create a byte arrayStream which holds the Singletile-Data,
+		// Create a byte arrayStream which holds the Single tile-Data,
 		// this is created in memory and written later if file is 
 		// not too big.
-		ByteArrayOutputStream fo = new ByteArrayOutputStream();
+		ByteArrayOutputStream fo = new ByteArrayOutputStream(32 * 1024);
 		DataOutputStream ds = new DataOutputStream(fo);
 		ds.writeByte(0x54); // Magic number
 		ds.writeFloat(MyMath.degToRad(t.centerLat));
