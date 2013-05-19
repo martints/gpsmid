@@ -1,6 +1,11 @@
 package de.ueller.osmToGpsMid.model;
 
-import java.util.Hashtable;
+import java.util.Arrays;
+import java.util.Collection;
+import java.util.HashSet;
+import java.util.Hashtable; 
+import java.util.Iterator;
+import java.util.Map;
 import java.util.Set;
 
 import de.ueller.osmToGpsMid.Configuration;
@@ -11,8 +16,12 @@ public class Entity extends SmallArrayMap<String,String> {
 
 	private static Configuration config = null;
 
-	public final static String urlTags[] = { "url", "website", "contact:website", "website:mobile", "contact:webcam" };
-	public final static String phoneTags[] = { "phone", "contact:phone" };
+	public final static Set<String> urlTags = new HashSet<String>(Arrays.asList(
+			"url", "website", "contact:website", "website:mobile", "contact:webcam"
+			));
+	public final static Set<String> phoneTags = new HashSet<String>(Arrays.asList(
+			"phone", "contact:phone" 
+			));
 
 	/**
 	 * the OSM id of this node
@@ -62,15 +71,7 @@ public class Entity extends SmallArrayMap<String,String> {
 		// file, tag urls together with ";"
 		// later also create a way to pass style-file-defined URL types
 		// to GPsMid
-		String url = null;
-		for (String urlTag : urlTags) {
-			url = addWithSemicolon(url, getAttribute(urlTag));
-		}
-		if (url != null) {
-			//System.out.println("Entity url: " + url);
-			return url;
-		}
-		return null;
+		return getJoinedStrings(";", urlTags);
 	}
 
 	public String getPhone() {
@@ -78,15 +79,29 @@ public class Entity extends SmallArrayMap<String,String> {
 		// file, tag urls together with ";"
 		// later also create a way to pass style-file-defined URL types
 		// to GPsMid
-		String phone = null;
-		for (String phoneTag : phoneTags) {
-			phone = addWithSemicolon(phone, getAttribute(phoneTag));
+		return getJoinedStrings(";", phoneTags);
+	}
+	
+	private String getJoinedStrings(String separator, Set<String> tags) {
+		Set<String> entries = new HashSet<String>();
+		for (Map.Entry<String, String> e : entrySet()) {
+			if (tags.contains(e.getKey())) {
+				entries.add(e.getValue());
+			}
 		}
-		if (phone != null) {
-			//System.out.println("Entity phone: " + phone);
-			return phone;
+		return join(separator, entries); 
+	}
+	
+	private String join(String separator, Collection<String> entries) {
+		if (entries.isEmpty()) {
+			return null;
 		}
-		return null;
+		Iterator<String> iter = entries.iterator();
+		StringBuilder sb = new StringBuilder(iter.next());
+		while (iter.hasNext()) {
+			sb.append(separator).append(iter.next());
+		}
+		return sb.toString();
 	}
 
 	public String addWithSemicolon(String orig, String toadd) {
