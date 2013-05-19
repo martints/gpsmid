@@ -14,7 +14,7 @@
  * Author: Steve Ratcliffe
  * Create date: 30-Jun-2008
  */
-package uk.me.parabola.mkgmap.general;
+package de.ueller.osmToGpsMid.area;
 
 import java.util.ArrayList;
 import java.util.List;
