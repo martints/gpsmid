@@ -22,7 +22,6 @@ import de.ueller.osmToGpsMid.model.Node;
 public class Area {
 	private ArrayList<Outline>	outlineList	= new ArrayList<Outline>();
 	private ArrayList<Outline>	holeList	= new ArrayList<Outline>();
-	Outline						outline		= new Outline();
 	public Triangle			triangle;
 	ArrayList<Triangle> triangleList = null;
 	static DebugViewer			viewer		= null;
@@ -54,7 +53,6 @@ public class Area {
 		outlineList = new ArrayList<Outline>();
 		holeList = new ArrayList<Outline>();
 		// tri = new ArrayList<Triangle>();
-		outline = new Outline();
 	}
 
 	public ArrayList<Triangle> triangulate() {
@@ -68,7 +66,7 @@ public class Area {
 		// if there are more ways than one are used to build the outline, try to construct one outline for that
 		ArrayList<Outline>	outlineTempList = new ArrayList<Outline>();
 		while (outlineList.size() > 0) {
-			outline = outlineList.get(0);
+			Outline outline = outlineList.get(0);
 			if (!outline.isClosed()) {
 				outline.connectPartWays(outlineList);
 			}
@@ -82,7 +80,7 @@ public class Area {
 		outlineTempList = new ArrayList<Outline>();
 		//System.err.println("Starting to connect part ways");
 		while (holeList.size() > 0) {
-			outline = holeList.get(0);
+			Outline outline = holeList.get(0);
 			if (!outline.isClosed()) {
 				outline.connectPartWays(holeList);
 			}
@@ -100,7 +98,7 @@ public class Area {
 		repaint();
 		int loop = 0;
 		while (outlineList.size() > 0) {
-			outline = outlineList.get(0);
+			Outline outline = outlineList.get(0);
 			
 			if (! outline.isValid()) {
 				outlineList.remove(0);
