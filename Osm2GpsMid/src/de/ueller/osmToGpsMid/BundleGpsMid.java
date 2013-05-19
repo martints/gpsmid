@@ -636,7 +636,6 @@ public class BundleGpsMid implements Runnable {
 			
 			System.out.println("Starting relation handling");
 			startTime = System.currentTimeMillis();
-			Area.setParser(parser);
 			new Relations(parser, config);
 			System.out.println("Relations processed");
 			time = (System.currentTimeMillis() - startTime);
