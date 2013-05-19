@@ -164,8 +164,8 @@ public class OxParser extends OsmParser {
 							if (!tagsCache.containsKey(val)) {
 								tagsCache.put(val, val);
 							}
-							current.setAttribute(tagsCache.get(key), tagsCache
-									.get(val));
+							current.setAttribute(tagsCache.get(key), 
+									tagsCache.get(val));
 						}
 					}
 				}
@@ -175,8 +175,8 @@ public class OxParser extends OsmParser {
 			} else if (qName.equals("member")) {
 				if (current instanceof Relation) {
 					Relation r = (Relation) current;
-					Member m = new Member(atts.getValue("type"), atts
-							.getValue("ref"), atts.getValue("role"));
+					Member m = new Member(atts.getValue("type"), 
+							atts.getValue("ref"), atts.getValue("role"));
 					switch (m.getType()) {
 					case Member.TYPE_NODE: {
 						if (!nodes.containsKey(new Long(m.getRef()))) {
