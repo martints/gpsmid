@@ -11,7 +11,7 @@
 package de.ueller.osmToGpsMid.area;
 
 
-import java.util.ArrayList;
+import java.util.ArrayList; 
 import java.util.Collections;
 import java.util.Comparator;
 import java.util.Iterator;
@@ -22,7 +22,7 @@ import de.ueller.osmToGpsMid.model.Node;
 
 
 public class Outline {
-	private ArrayList<Vertex> vertexList = new ArrayList<Vertex>();
+	private final List<Vertex> vertexList = new ArrayList<Vertex>();
 	private long wayId = -1;
 //	private ArrayList<Vertex> ordered;
 	
@@ -34,9 +34,10 @@ public class Outline {
 		this.wayId = wayId;
 	}
 
-	public ArrayList<Vertex> getVertexList() {
-		return vertexList;
+	public List<Vertex> getVertexList() {
+		return Collections.unmodifiableList(vertexList);
 	}
+	
 	public boolean isValid() {
 		if (vertexList.size() < 2) {
 			return false;
@@ -45,7 +46,7 @@ public class Outline {
 	}
 
 	public void clean() {
-		vertexList = new ArrayList<Vertex>();
+		vertexList.clear();
 	}
 	
 	public void prepend(Vertex v) {
@@ -78,12 +79,13 @@ public class Outline {
 		do {
 			changed = false;
 			Iterator<Outline> i = others.iterator();
-			while (i.hasNext()) {
-				Vertex last = null;
-				Vertex first = null;
-				last = vertexList.get(vertexList.size() - 1);
-				first = vertexList.get(0);
+			
+			while (i.hasNext() && ! changed) {
 				Outline o = i.next();
+				
+				final Vertex last = vertexList.get(vertexList.size() - 1);
+				final Vertex first = vertexList.get(0);
+				
 //				System.out.println("Iterating, node: " + o.vertexList.get(0).getNode());
 				if (o == this) {
 //					System.out.println("o == this");
@@ -95,14 +97,16 @@ public class Outline {
 //					System.out.println("last.getNode(): " + last.getNode());
 //					System.out.println("first.getNode(): " + first.getNode());
 //					System.out.println("vertexlist size: " + vertexList.size());
-					if (o.vertexList.get(0).getNode().equals(last.getNode())) {
+					Node otherFirst = o.vertexList.get(0).getNode();
+					Vertex otherLast = o.vertexList.get(o.vertexList.size()-1);
+					if (otherFirst.equals(last.getNode())) {
 //						System.out.println("found way connecting to end of outline, so append it");
 						changed = true;
 						for (Vertex v : o.vertexList) {
 							append(v);
 						}
 						i.remove();
-					} else if (o.vertexList.get(o.vertexList.size()-1).getNode().equals(last.getNode())) {
+					} else if (otherLast.getNode().equals(last.getNode())) {
 //						System.out.println("found way reverse connecting to end of outline, so append it");
 						changed = true;
 						for (int loop = o.vertexList.size()-1; loop >= 0; loop--) {
@@ -110,14 +114,14 @@ public class Outline {
 							append(v);
 						}
 						i.remove();
-					} else if (o.vertexList.get(0).getNode().equals(first.getNode())) {
+					} else if (otherFirst.equals(first.getNode())) {
 //						System.out.println("found way connecting to start of outline, so prepend it");
 						changed = true;
 						for (Vertex v : o.vertexList) {
 							prepend(v);
 						}
 						i.remove();
-					} else if (o.vertexList.get(o.vertexList.size()-1).getNode().equals(first.getNode())) {
+					} else if (otherLast.getNode().equals(first.getNode())) {
 //						System.out.println("found way reverse connecting to start of outline, so prepend it");
 						changed = true;
 						for (int loop = o.vertexList.size()-1; loop >= 0; loop--) {
@@ -136,12 +140,11 @@ public class Outline {
 		if (vertexList == null || vertexList.size() == 0) {
 			return;
 		}
-		Vertex prev = null;
-		Vertex first = null;
-		first = vertexList.get(0);
-		prev = vertexList.get(vertexList.size() - 1);
+		Vertex prev = vertexList.get(vertexList.size() - 1);
+		Vertex first = vertexList.get(0);
 		if (first.equals(prev)) {
 			vertexList.remove(vertexList.size() - 1);
+			prev = vertexList.get(vertexList.size() - 1);
 		}
 		if (vertexList.size() < 3) {
 			// this is a degenerated polygon make it empty
@@ -150,17 +153,10 @@ public class Outline {
 		}
 		for (Vertex v : vertexList) {
 			v.setOutline(this);
-			if (first == null) {
-				first = v;
-				prev = v;
-			} else {
-				v.setPrev(prev);
-				prev.setNext(v);
-				prev = v;
-			}
-			
+			v.setPrev(prev);
+			prev.setNext(v);
+			prev = v;
 		}
-		first.setPrev(prev);
 		prev.setNext(first);
 	}
 	
@@ -170,10 +166,8 @@ public class Outline {
     //		Collections.sort(ordered, new LonComperator());
     //		return ordered;
     //	}
-	@SuppressWarnings("unchecked")
 	public Vertex getLonMin() {
-		ArrayList<Vertex> ordered = (ArrayList<Vertex>) vertexList.clone();
-		return Collections.min(ordered, new LonComperator());
+		return Collections.min(vertexList, new LonComperator());
 	}
     //	@SuppressWarnings("unchecked")
     //	public List<Vertex> getOrdered(int dir) {
@@ -226,27 +220,27 @@ public class Outline {
 
 	public ArrayList<Vertex> findVertexInside(Triangle triangle, ArrayList<Vertex> ret) {
 	    if (ret == null) {
-		ret = new ArrayList<Vertex>();
+	    	ret = new ArrayList<Vertex>();
 	    }
 	    for (Vertex vertex : vertexList) {
-		if (triangle.isVertexInside(vertex)){
-		    ret.add(vertex);
-		}
+			if (triangle.isVertexInside(vertex)){
+			    ret.add(vertex);
+			}
 	    }
 	    if (ret.isEmpty()) {
-		return null;
+	    	return null;
 	    } else {
-		return ret;
+	    	return ret;
 	    }
 	}
 
     public Vertex findFirstVertexInside(Triangle triangle, Comparator<Vertex> comp, Vertex first) {
-	    for (Vertex vertex : vertexList) {
-		if (triangle.isVertexInside(vertex)){
-		    if ((first == null) || (comp.compare(first, vertex) > 0)) {
-			first = vertex;
-		    }
-		}
+    	for (Vertex vertex : vertexList) {
+    		if (triangle.isVertexInside(vertex)){
+    			if ((first == null) || (comp.compare(first, vertex) > 0)) {
+			    	first = vertex;
+			    }
+			}
 	    }
 	    return first;
 	}
