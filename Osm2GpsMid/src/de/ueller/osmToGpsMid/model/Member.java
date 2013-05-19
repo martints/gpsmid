@@ -19,6 +19,8 @@ public class Member {
 	public static final byte TYPE_WAY=1;
 	public static final byte TYPE_NODE=2;
 	public static final byte TYPE_RELATION=3;
+	
+	
 	public static final byte ROLE_UNKOWN=0;
 	public static final byte ROLE_EMPTY=1;
 	
