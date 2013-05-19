@@ -4,6 +4,8 @@ import java.util.Comparator;
 
 public class DirectionComperatorX implements Comparator<Vertex> {
 
+	public static final DirectionComperatorX INSTANCE = new DirectionComperatorX();
+	
 	public DirectionComperatorX() {
 		super();
 	}
