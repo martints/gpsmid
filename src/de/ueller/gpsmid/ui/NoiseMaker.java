@@ -315,7 +315,11 @@ public class NoiseMaker
 				//#debug debug
 				mLogger.debug("starting sleep after " + soundFileWithSuffix);
 				try {
-					Thread.sleep(500);
+					long duration = aPlayer.getPlayer().getDuration();
+					if (duration == Player.TIME_UNKNOWN) {
+						duration = 1500;
+					}
+					Thread.sleep(duration + 100);
 				} catch (Exception ex) {}
 				playNextSoundFile();
 			}
