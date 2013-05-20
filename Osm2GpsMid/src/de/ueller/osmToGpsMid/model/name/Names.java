@@ -202,4 +202,14 @@ public class Names {
 		return l;
 	}
 
+	/**
+	 * 
+	 */
+	public void dropCanons() {
+		houseNumberCanons.clear();
+		canons.clear();
+		wholeWordCanons.clear();
+		wordCanons.clear();
+	}
+
 }

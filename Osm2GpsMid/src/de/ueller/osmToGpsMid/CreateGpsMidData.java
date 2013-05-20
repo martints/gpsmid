@@ -165,13 +165,11 @@ public class CreateGpsMidData implements FilenameFilter {
 	/** Prepares and writes the complete map data.
 	 */
 	public void exportMapToMid() {
-		names1 = getNames1();
-		urls1 = getUrls1();
 		exportLegend(path);
-		SearchList sl = new SearchList(names1, urls1, wayRedirect);
-		UrlList ul = new UrlList(urls1);
-		sl.createNameList(path);
-		ul.createUrlList(path);
+		
+		createSearchLists();
+		
+		
 		for (int i = 0; i <= 3; i++) {
 			System.out.println("Exporting tiles for zoomlevel " + i );
 			System.out.println("===============================");
@@ -208,19 +206,6 @@ public class CreateGpsMidData implements FilenameFilter {
 //			tile[ROUTEZOOMLEVEL].printHiLo(1, x);
 //		}
 //		System.exit(2);
-		// create search list for whole items
-		//sl.createSearchList(path, SearchList.INDEX_NAME);
-		// create search list for names, including data for housenumber matching, primary since map version 66
-		sl.createSearchList(path, SearchList.INDEX_BIGNAME);
-		// create search list for words
-		if (Configuration.getConfiguration().useWordSearch) {
-			sl.createSearchList(path, SearchList.INDEX_WORD);
-			// create search list for whole words / house numbers
-			sl.createSearchList(path, SearchList.INDEX_WHOLEWORD);
-		}
-		if (Configuration.getConfiguration().useHouseNumbers) {
-			sl.createSearchList(path, SearchList.INDEX_HOUSENUMBER);
-		}
 
 		// Output statistics for travel modes
 		if (Configuration.attrToBoolean(configuration.useRouting) >= 0) {
@@ -242,7 +227,7 @@ public class CreateGpsMidData implements FilenameFilter {
 				         + ", nodes: " + totalNodesWritten
 				         + ", POI: " + totalPOIsWritten);
 	}
-	
+
 	private Names getNames1() {
 		Names na = new Names();
 		for (Way w : parser.getWays()) {
@@ -270,6 +255,30 @@ public class CreateGpsMidData implements FilenameFilter {
 		System.out.println("found " + na.getUrls().size() + " urls, including phones ");
 		na.calcUrlIndex();
 		return (na);
+	}
+	
+	private void createSearchLists() {
+		long startTime = System.currentTimeMillis();
+		names1 = getNames1();
+		urls1 = getUrls1();
+		SearchList sl = new SearchList(names1, urls1, wayRedirect);
+		new UrlList(urls1).createUrlList(path);
+		sl.createNameList(path);
+		// create search list for whole items
+		//sl.createSearchList(path, SearchList.INDEX_NAME);
+		// create search list for names, including data for housenumber matching, primary since map version 66
+		sl.createSearchList(path, SearchList.INDEX_BIGNAME);
+		// create search list for words
+		if (Configuration.getConfiguration().useWordSearch) {
+			sl.createSearchList(path, SearchList.INDEX_WORD);
+			// create search list for whole words / house numbers
+			sl.createSearchList(path, SearchList.INDEX_WHOLEWORD);
+		}
+		if (Configuration.getConfiguration().useHouseNumbers) {
+			sl.createSearchList(path, SearchList.INDEX_HOUSENUMBER);
+		}
+		names1.dropCanons();
+		System.out.println("Wrote names in " + (System.currentTimeMillis() - startTime) + "ms");
 	}
 	
 	private void exportLegend(String path) {
