@@ -63,7 +63,9 @@ public class Names {
 		}
 	
 		Name mn = new Name(word);
-		if (! canon.add(mn)){
+		if (canon.add(mn)) {
+			mn.addEntity(w);
+		} else {
 		    Name mnNext = new Name(w.getName()+"\0");
 		    mnNext.setCanon(mn.getCanon());
 		    try {
