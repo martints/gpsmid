@@ -9,15 +9,22 @@
  */
 package de.ueller.osmToGpsMid;
 
-import java.io.IOException;
+import java.io.IOException; 
 import java.io.InputStream;
 import java.util.List;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
+import java.util.concurrent.Semaphore;
+import java.util.concurrent.TimeUnit;
 
 import crosby.binary.BinaryParser;
 import crosby.binary.Osmformat;
 import crosby.binary.Osmformat.DenseNodes;
 import crosby.binary.Osmformat.HeaderBlock;
 import crosby.binary.file.BlockInputStream;
+import crosby.binary.file.BlockReaderAdapter;
+import crosby.binary.file.FileBlock;
+import crosby.binary.file.FileBlockPosition;
 import de.ueller.osmToGpsMid.model.Entity;
 import de.ueller.osmToGpsMid.model.Member;
 import de.ueller.osmToGpsMid.model.Node;
@@ -27,12 +34,77 @@ import de.ueller.osmToGpsMid.model.Way;
 
 public class OpbfParser extends OsmParser {
 
-	/**
-	 * @param i
-	 */
+	private static class DataRelay 
+			implements BlockReaderAdapter {
+		
+		private final BlockReaderAdapter inner;
 
+		private final ExecutorService service = Executors.newSingleThreadExecutor();
+		private final Semaphore semaphore = new Semaphore(5);
+		
+		public DataRelay(BlockReaderAdapter inner_) {
+			inner = inner_;
+		}
+		
+		@Override
+		public boolean skipBlock(FileBlockPosition message) {
+			return inner.skipBlock(message);
+		}
+
+		private void execute(final Runnable runable) {
+			try {
+				semaphore.acquire();
+			} catch (InterruptedException e) {
+				Thread.currentThread().interrupt();
+				throw new RuntimeException(e);
+			}
+			service.execute(new Runnable() {
+				
+				@Override
+				public void run() {
+					runable.run();
+					semaphore.release();
+				}
+			});
+		}
+		
+		@Override
+		public void handleBlock(final FileBlock message) {
+			execute(new Runnable() {
+				
+				@Override
+				public void run() {
+					inner.handleBlock(message);
+				}
+			});
+		}
+
+		@Override
+		public void complete() {
+			execute(new Runnable() {
+				
+				@Override
+				public void run() {
+					inner.complete();
+				}
+			});
+			service.shutdown();
+			try {
+				service.awaitTermination(100000, TimeUnit.DAYS);
+			} catch (InterruptedException e) {
+				Thread.currentThread().interrupt();
+				throw new RuntimeException(e);
+			}
+		}
+		
+	}
+	
 	private class OsmPbfHandler extends BinaryParser {
 
+		private long lastTime = 0;
+		private final ExecutorService service = Executors.newSingleThreadExecutor();
+		private final Semaphore semaphore = new Semaphore(5);
+		
 		@Override
 		public void parse(HeaderBlock block) {
 			for (String s : block.getRequiredFeaturesList()) {
@@ -44,13 +116,26 @@ public class OpbfParser extends OsmParser {
 				}
 				throw new Error("File requires unknown feature: " + s);
 			}
-			try {
-				Thread.sleep(1000);
-			} catch (InterruptedException ie) {
-
-			}
+			lastTime = System.currentTimeMillis();
 		}
 
+		public void parse(final Osmformat.PrimitiveBlock block) {
+			try {
+				semaphore.acquire();
+			} catch (InterruptedException e) {
+				Thread.currentThread().interrupt();
+				throw new RuntimeException(e);
+			}
+			service.execute(new Runnable() {
+				
+				@Override
+				public void run() {
+					OsmPbfHandler.super.parse(block);
+					semaphore.release();
+				}
+			});
+		}
+		
 		/*
 		 * (non-Javadoc)
 		 * 
@@ -117,7 +202,6 @@ public class OpbfParser extends OsmParser {
 			}
 
 			nodeTot += dn.getLatCount();
-			ele += dn.getLatCount();
 			printProgress();
 		}
 
@@ -131,7 +215,6 @@ public class OpbfParser extends OsmParser {
 			// TODO Auto-generated method stub
 			// System.out.println("Parsing nodes: " + nds);
 			nodeTot += nds.size();
-			ele += nds.size();
 			if (nds.size() > 0) {
 				System.out.println("Non dense nodes!");
 			}
@@ -147,12 +230,7 @@ public class OpbfParser extends OsmParser {
 		protected void parseWays(List<crosby.binary.Osmformat.Way> ways_chunk) {
 			for (crosby.binary.Osmformat.Way i : ways_chunk) {
 				Way way = new Way(i.getId());
-				for (int j = 0; j < i.getKeysCount(); j++) {
-					String key = getStringById(i.getKeys(j));
-					if (LegendParser.getRelevantKeys().contains(key)) {
-						way.setAttribute(key, getStringById(i.getVals(j)));
-					}
-				}
+				boolean nodeFound = false;
 
 				long last_id = 0;
 				for (long j : i.getRefsList()) {
@@ -160,6 +238,17 @@ public class OpbfParser extends OsmParser {
 					Node node = nodes.get(new Long(ref));
 					if (node != null) {
 						way.addNode(node);
+						
+						// Search the entries only, if at least one node was found
+						if (! nodeFound) {
+							for (int k = 0; k < i.getKeysCount(); k++) {
+								String key = getStringById(i.getKeys(k));
+								if (LegendParser.getRelevantKeys().contains(key)) {
+									way.setAttribute(key, getStringById(i.getVals(k)));
+								}
+							}
+							nodeFound = true;
+						}
 					} else {
 						// Nodes for this way are missing, problem in OSM or simply
 						// out of bounding box.
@@ -178,13 +267,14 @@ public class OpbfParser extends OsmParser {
 					}
 					last_id = ref;
 				}
-				addWay(way);
-				if (way.isArea()) {
-					way.saveOutline();
+				if (way.getNodeCount() > 0) {
+					addWay(way);
+					if (way.isArea()) {
+						way.saveOutline();
+					}
 				}
 			}
-			wayTot += ways.size();
-			ele += ways.size();
+			wayTot += ways_chunk.size();
 		}
 
 		/*
@@ -268,14 +358,13 @@ public class OpbfParser extends OsmParser {
 				}
 			}
 			relTot += rels.size();
-			ele += rels.size();
 			printProgress();
 		}
 
 		private void printProgress() {
 
-			if (ele > 1000000) {
-				ele = 0;
+			if (System.currentTimeMillis() - lastTime > 10000) {
+				lastTime = System.currentTimeMillis();
 				System.out.println("Nodes " + nodeTot + "/" + nodeIns
 						+ ", Ways " + wayTot + "/" + wayIns + ", Relations "
 						+ relTot + "/" + relPart + "/" + relIns);
@@ -290,6 +379,13 @@ public class OpbfParser extends OsmParser {
 		@Override
 		public void complete() {
 			System.out.println("End of document");
+			service.shutdown();
+			try {
+				service.awaitTermination(100000, TimeUnit.DAYS);
+			} catch (InterruptedException e) {
+				Thread.currentThread().interrupt();
+				throw new RuntimeException(e);
+			}
 		}
 	}
 
@@ -298,10 +394,9 @@ public class OpbfParser extends OsmParser {
 	 */
 	protected Entity current = null;
 
-	protected int nodeTot, nodeIns;
-	protected int wayTot;
-	protected int ele;
-	protected int relTot, relPart, relIns;
+	protected long nodeTot, nodeIns;
+	protected long wayTot;
+	protected long relTot, relPart, relIns;
 	private long startTime;
 
 	private Node previousNodeWithThisId;
@@ -320,7 +415,7 @@ public class OpbfParser extends OsmParser {
 	protected void init(InputStream i) {
 		try {
 			startTime = System.currentTimeMillis();
-			BlockInputStream bis = new BlockInputStream(i, new OsmPbfHandler());
+			BlockInputStream bis = new BlockInputStream(i, new DataRelay(new OsmPbfHandler()));
 			System.out.println("Start of Document");
 			System.out
 					.println("Nodes read/used, Ways read/used, Relations read/partial/used");
