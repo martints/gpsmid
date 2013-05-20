@@ -26,6 +26,7 @@ import java.io.FileOutputStream;
 import java.io.FilenameFilter;
 import java.io.IOException;
 import java.io.InputStream;
+import java.io.OutputStream;
 import java.nio.channels.FileChannel;
 import java.util.ArrayList;
 import java.util.Collection;
@@ -993,7 +994,7 @@ public class CreateGpsMidData implements FilenameFilter {
 		OsmParser.printMemoryUsage(1);
 		long outputLength = 0;
 		try {
-			FileOutputStream fo = new FileOutputStream(path + "/dat/dict-" + zl + ".dat");
+			OutputStream fo = new BufferedOutputStream(new FileOutputStream(path + "/dat/dict-" + zl + ".dat"));
 			DataOutputStream ds = new DataOutputStream(fo);
 			// magic number
 			ds.writeUTF("DictMid");
@@ -1506,13 +1507,13 @@ public class CreateGpsMidData implements FilenameFilter {
 			if (node.fid) {
 				continue;
 			}
+			if (! targetBound.isIn(node.lat, node.lon)) {
+				continue;
+			}
 			if (node.getType(configuration) < 0) {
 				continue;
 			}
 			if (node.getZoomlevel(configuration) != zl) {
-				continue;
-			}
-			if (! targetBound.isIn(node.lat, node.lon)) {
 				continue;
 			}
 			nodes.add(node);
