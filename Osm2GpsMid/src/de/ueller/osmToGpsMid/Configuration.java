@@ -1199,7 +1199,6 @@ public class Configuration {
 					HttpURLConnection conn = (HttpURLConnection)url.openConnection();
 					conn.setRequestProperty("User-Agent", "Osm2GpsMid");
 					conn.connect();
-					InputStream planetStream;
 					fr = new BufferedInputStream(conn.getInputStream());
 				} else {
 					fr = new FileInputStream(planet);
