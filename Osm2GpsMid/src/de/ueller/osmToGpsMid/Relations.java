@@ -410,7 +410,7 @@ public class Relations {
 			}
 			try {
 				if (Configuration.getConfiguration().triangleAreaFormat) {
-					ArrayList<Triangle> areaTriangles = a.triangulate();
+					List<Triangle> areaTriangles = a.triangulate();
 					firstWay.triangles = areaTriangles;
 					//firstWay.recreatePathAvoidDuplicates();
 					firstWay.recreatePath();
