@@ -15,6 +15,7 @@ import java.util.Comparator;
 import java.util.Iterator;
 import java.util.LinkedList;
 import java.util.List;
+import java.util.concurrent.CopyOnWriteArrayList;
 
 import uk.me.parabola.mkgmap.reader.osm.FakeIdGenerator;
 import de.ueller.osmToGpsMid.MyMath;
@@ -22,11 +23,11 @@ import de.ueller.osmToGpsMid.model.Bounds;
 import de.ueller.osmToGpsMid.model.Node;
 
 public class Area {
-	public static final boolean DEBUG = false;
+	public static final boolean DEBUG = true;
 
 	private List<Outline>	outlineList	= new ArrayList<Outline>();
 	private List<Outline>	holeList	= new ArrayList<Outline>();
-	ArrayList<Triangle> triangleList = null;
+	List<Triangle> triangleList = null;
 	static DebugViewer			viewer		= null;
 
 	public double maxdist = 0d;
@@ -37,6 +38,17 @@ public class Area {
 	//double limitdist = 1250000d;
 	//double limitdist = 10000d;
 
+	public Area () {
+		if (DEBUG) {
+			outlineList	= new CopyOnWriteArrayList<Outline>();
+			holeList	= new CopyOnWriteArrayList<Outline>();
+		} else {
+			outlineList	= new ArrayList<Outline>();
+			holeList	= new ArrayList<Outline>();
+		}
+		
+	}
+	
 	public void addOutline(Outline p) {
 		if (p.isValid()) {
 			outlineList.add(p);
@@ -69,28 +81,37 @@ public class Area {
 		return outlineTempList;
 	}
 	
-	public ArrayList<Triangle> triangulate() {
+	public List<Triangle> triangulate() {
 		if (DEBUG) {
 			if (viewer == null) {
 				viewer = new DebugViewer(this);
 			} else {
 				viewer.setArea(this);
 			}
+			repaint();
 		}
+		
+		List<Triangle> ret;
+		if (DEBUG) {
+			ret = new CopyOnWriteArrayList<Triangle>();
+		} else {			
+			ret = new ArrayList<Triangle>(1);
+		}
+		triangleList = ret;
+		
 		// if there are more ways than one are used to build the outline, try to construct one outline for that
 		outlineList = cleanupOutlines(outlineList);
 		// the same for the holes
 		holeList = cleanupOutlines(holeList);
 		
 		int dir = 0;
-		ArrayList<Triangle> ret = new ArrayList<Triangle>(1);
-		triangleList = ret;
 		repaint();
 		int loop = 0;
 		while (outlineList.size() > 0) {
 			Outline outline = outlineList.remove(0);
 			if (DEBUG) {
 				viewer.setActiveOutline(outline);
+				repaint();
 			}
 			
 			if (! outline.isValid()) {
@@ -127,13 +148,18 @@ public class Area {
 		//System.out.println("loops :" + loop);
 		//System.err.println("Starting to optimize");
 		optimize();
-		ret.trimToSize();
-		//System.err.println("Finished optimizing");
+		
+		if (DEBUG) {
+			viewer.done();
+		} else {
+			((ArrayList<Triangle>)ret).trimToSize();
+		}
+		//System.err.println("Finished optimizing"); 
 		return ret;
 
 	}
-	private void splitTriangleIfNeeded(Triangle t, ArrayList<Triangle> ret, int recurselevel) {
-		// check the size; if a line is too long, split the tringle
+	private void splitTriangleIfNeeded(Triangle t, List<Triangle> ret, int recurselevel) {
+		// check the size; if a line is too long, split the triangle
 		Node n0 = t.getVert()[0].getNode();
 		Node n1 = t.getVert()[1].getNode();
 		Node n2 = t.getVert()[2].getNode();
@@ -225,20 +251,12 @@ public class Area {
 	 */
 	private final void repaint() {
 		if (DEBUG) {
-			if (viewer == null) {
-				viewer = DebugViewer.getInstanz(this);
-			} else {
-				viewer.setArea(this);
+			viewer.repaint();
+			try {
+				Thread.sleep(1000);
+			} catch (InterruptedException e) {
 			}
-
-			if (viewer != null) {
-				viewer.repaint();
-				try {
-					Thread.sleep(100);
-				} catch (InterruptedException e) {
-				}
-				// System.out.println("Area.repaint()");
-			}
+			// System.out.println("Area.repaint()");
 		}
 	}
 
