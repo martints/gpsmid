@@ -60,8 +60,6 @@ public class Triangle {
         }
         
 	public Vertex getMidpoint() {
-		float lat = 0f;
-		float lon = 0f;
 		float minLat = Float.MAX_VALUE;
 		float minLon = Float.MAX_VALUE;
 		float maxLat = -Float.MAX_VALUE;
