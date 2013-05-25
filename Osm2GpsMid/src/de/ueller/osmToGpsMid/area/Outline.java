@@ -288,7 +288,8 @@ public class Outline {
 		Vertex v = getLonMin();
 		Vertex vp = v.getPrev();
 		Vertex vn = v.getNext();
-		if (((v.getX()-vp.getX())*(vn.getY()-v.getY())-(v.getY()-vp.getY())*(vn.getX()-v.getX())) <0  ) {
+		if (((v.getX() - vp.getX()) * (vn.getY() - v.getY())
+				- (v.getY() - vp.getY()) * (vn.getX() - v.getX())) < 0) {
 			return true;
 		} else {
 			return false;

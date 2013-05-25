@@ -10,6 +10,8 @@
 
 package de.ueller.osmToGpsMid.area;
 
+import java.awt.geom.Rectangle2D;
+
 import de.ueller.osmToGpsMid.model.Bounds;
 
 public class Triangle {
@@ -115,6 +117,43 @@ public class Triangle {
 			}
 		}
 		return ret;
+	}
+
+	public Rectangle2D getBoundingBox() {
+		Vertex n1 = vert[0];
+		Vertex n2 = vert[1];
+		Vertex n3 = vert[2];
+		float minX = min(n1.getX(), n2.getX(), n3.getX());
+		float maxX = max(n1.getX(), n2.getX(), n3.getX());
+		float minY = min(n1.getY(), n2.getY(), n3.getY());
+		float maxY = max(n1.getY(), n2.getY(), n3.getY());
+		
+		return new Rectangle2D.Float(minX, minY, maxX - minX, maxY - minY);
+	}
+
+	
+	protected float min(float x, float x2, float x3) {
+		float result = x;
+		if (x2 < result) {
+			result = x2;
+		}
+		if (x3 < result) {
+			return x3;
+		} else {
+			return result;
+		}
+	}
+
+	protected float max(float x, float x2, float x3) {
+		float result = x;
+		if (x2 > result) {
+			result = x2;
+		}
+		if (x3 > result) {
+			return x3;
+		} else {
+			return result;
+		}
 	}
 
 }

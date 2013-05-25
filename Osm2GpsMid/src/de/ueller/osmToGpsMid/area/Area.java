@@ -10,7 +10,7 @@
 
 package de.ueller.osmToGpsMid.area;
 
-import java.util.ArrayList; 
+import java.util.ArrayList;  
 import java.util.Comparator;
 import java.util.Iterator;
 import java.util.LinkedList;
@@ -23,7 +23,7 @@ import de.ueller.osmToGpsMid.model.Bounds;
 import de.ueller.osmToGpsMid.model.Node;
 
 public class Area {
-	public static final boolean DEBUG = true;
+	public static final boolean DEBUG = false;
 
 	private List<Outline>	outlineList	= new ArrayList<Outline>();
 	private List<Outline>	holeList	= new ArrayList<Outline>();
@@ -102,7 +102,12 @@ public class Area {
 		// if there are more ways than one are used to build the outline, try to construct one outline for that
 		outlineList = cleanupOutlines(outlineList);
 		// the same for the holes
-		holeList = cleanupOutlines(holeList);
+		List<Outline> holeList_ = cleanupOutlines(holeList);
+		holeList = new LinkedList<Outline>();
+		for (Outline o : holeList_) {
+			holeList.add(new BoundedOutline(o));
+		}
+		
 		
 		int dir = 0;
 		repaint();
@@ -119,6 +124,7 @@ public class Area {
 			}
 
 			outline.calcNextPrev();
+			
 			//System.err.println("Starting to do the cutOneEar thing");
 			while ((outline.vertexCount() > 3)
 						|| ((outline.vertexCount() > 2) && !holeList.isEmpty())) {
@@ -158,6 +164,7 @@ public class Area {
 		return ret;
 
 	}
+
 	private void splitTriangleIfNeeded(Triangle t, List<Triangle> ret, int recurselevel) {
 		// check the size; if a line is too long, split the triangle
 		Node n0 = t.getVert()[0].getNode();
@@ -172,7 +179,10 @@ public class Area {
 
 			if (recurselevel > 80) {
 				System.out.println("WARNING: Recurselevel > 80, giving up splitting triangle " + t);
-				ret.add(t);
+				ret.add(new Triangle(t));
+				if (DEBUG) {
+					viewer.triangleAdded(t);
+				}
 				return;
 			}
 
@@ -218,7 +228,10 @@ public class Area {
 			splitTriangleIfNeeded(t2, ret, recurselevel + 1);
 		} else {
 			//System.out.println("Adding side " + side + " of triangle");
-			ret.add(t);
+			ret.add(new Triangle(t));
+			if (DEBUG) {
+				viewer.triangleAdded(t);
+			}
 		}
 	}
 	private void optimize() {
@@ -252,10 +265,7 @@ public class Area {
 	private final void repaint() {
 		if (DEBUG) {
 			viewer.repaint();
-			try {
-				Thread.sleep(1000);
-			} catch (InterruptedException e) {
-			}
+			viewer.waitToContinue();
 			// System.out.println("Area.repaint()");
 		}
 	}
@@ -263,7 +273,7 @@ public class Area {
 	private Triangle cutOneEar(Outline outline, List<Outline> holeList, int dir) {
 		Vertex n = outline.getMin(dir);
 		while (true) {
-			BoundedTriangle triangle = new BoundedTriangle(n, n.getNext(), n.getPrev());
+			Triangle triangle = new BoundedTriangle(n, n.getNext(), n.getPrev());
 			Vertex vertexInside = findFirstVertexInside(outline, triangle, dir);
 			if (DEBUG) {
 				viewer.setCurrentPosition(triangle, vertexInside);
@@ -276,8 +286,8 @@ public class Area {
 				outline.remove(n);
 				return triangle;
 				
-			// at least one edge is inside this ear. Is it from the outline,
-		    // that is is the outline intersecting itself?
+			// at least one edge is inside this ear. Is it from the outline, 
+			// that is the outline is convex
 			} else if (vertexInside.partOf(outline)) {
 				
 				// node of the outline is in the ear so we have to cut the outline into two parts
@@ -291,7 +301,7 @@ public class Area {
 				}
 				// go ahead the edge that was found inside the test triangle
 				outline.append(vertexInside);
-				Outline newOutline = new Outline();
+				Outline newOutline = new BoundedOutline();
 				newOutline.setWayId(outline.getWayId());
 				while (nt != n) {
 					newOutline.append(nt);
@@ -299,7 +309,7 @@ public class Area {
 				}
 				newOutline.append(n);
 				if (newOutline.isValid()) {
-					addOutline(newOutline);
+					outlineList.add(0, newOutline);
 					newOutline.calcNextPrev();
 				}
 				
@@ -353,7 +363,6 @@ public class Area {
 				   at java.lang.Thread.run(Thread.java:679) */
 
 				//clockWise = hole.isClockWiseFast();
-				hole.calcNextPrev();
 				nt = vertexInside;
 				if (hole.isClockWise()) {
 					do {
@@ -406,12 +415,16 @@ public class Area {
 		switch (dir) {
 		case 0:
 			    comp = DirectionComperator0.INSTANCE;
+			    break;
 		case 1:
 			    comp = DirectionComperator1.INSTANCE;
+			    break;
 		case 2:
 			    comp = DirectionComperator2.INSTANCE;
+			    break;
 		default:
 			    comp = DirectionComperatorX.INSTANCE;
+			    break;
 		}
 
 		Vertex ret = outline.findFirstVertexInside(triangle, comp, null);
@@ -447,5 +460,5 @@ public class Area {
 	public List<Outline> getHoleList() {
 		return holeList;
 	}
-
+	
 }
