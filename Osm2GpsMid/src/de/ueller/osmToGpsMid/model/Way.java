@@ -74,7 +74,7 @@ public class Way extends Entity implements Comparable<Way> {
 	private Path					outlinePath								= null;
 	private ArrayList<Path> 		holes = null;
 	public HouseNumber			housenumber							= null;
-	public ArrayList<Triangle>		triangles							= null;
+	public List<Triangle>		triangles							= null;
 	//private Bounds				bound								= null;
 
 	/** Up to 4 travel modes for which this way can be used (motorcar, bicycle, etc.)
@@ -1447,7 +1447,9 @@ public class Way extends Entity implements Comparable<Way> {
 				//}
 			}
 		}
-		triangles.trimToSize();
+		if (triangles instanceof ArrayList) {
+			((ArrayList<Triangle>) triangles).trimToSize();
+		}
 		trimPath();
 		//clearBounds();
 	}
@@ -1467,7 +1469,9 @@ public class Way extends Entity implements Comparable<Way> {
 				}
 			}
 		}
-		triangles.trimToSize();
+		if (triangles instanceof ArrayList) {
+			((ArrayList<Triangle>) triangles).trimToSize();
+		}
 		trimPath();
 		//clearBounds();
 	}
