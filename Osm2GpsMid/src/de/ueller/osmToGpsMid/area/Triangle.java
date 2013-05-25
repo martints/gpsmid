@@ -22,6 +22,12 @@ public class Triangle {
 		getVert()[2] = n3;
 	}
 		
+	public Triangle(Triangle t) {
+		getVert()[0] = t.getVert()[0];
+		getVert()[1] = t.getVert()[1];
+		getVert()[2] = t.getVert()[2];
+	}
+		
 	public boolean isVertexInside(Vertex n){
 		if (n == getVert()[0] && n == getVert()[1] && n == getVert()[2]) {
 			return false;

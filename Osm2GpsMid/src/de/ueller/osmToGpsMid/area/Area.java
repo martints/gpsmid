@@ -113,7 +113,7 @@ public class Area {
 					break;
 				}
 				Triangle t = cutOneEar(outline, holeList, dir);
-				splitTriangleIfNeeded(t, ret, 0);
+				splitTriangleIfNeeded(new Triangle(t), ret, 0);
 				dir = (dir + 1) % 4;
 			}
 			if (outline.vertexCount() == 3) {
@@ -245,7 +245,7 @@ public class Area {
 	private Triangle cutOneEar(Outline outline, List<Outline> holeList, int dir) {
 		Vertex n = outline.getMin(dir);
 		while (true) {
-			Triangle triangle = new Triangle(n, n.getNext(), n.getPrev());
+			BoundedTriangle triangle = new BoundedTriangle(n, n.getNext(), n.getPrev());
 			Vertex vertexInside = findFirstVertexInside(outline, triangle, dir);
 			if (DEBUG) {
 				viewer.setCurrentPosition(triangle, vertexInside);
