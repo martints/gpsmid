@@ -707,31 +707,33 @@ CompassReceiver, Runnable , GpsMidDisplayable, CompletionListener, IconActionPer
 				repaint();
 				return true;
 			case MotionEvent.ACTION_MOVE:
-				final int pointerIndex = event.findPointerIndex(mtPointerId);
-				int mCount = event.getPointerCount();
-				// pinch zoom when at map screen but not in other screens
-				if (imageCollector != null && imageCollector.isRunning() && mCount > 1 && mtPointerId != INVALID_POINTER_ID) {
-					if (angleDiff((int) pinchZoomOrigAngle, (int) angle(event)) > 20) {
-						rotationStarted = true;
-						// on pinch rotate stop compass readings from rotating the map by setting manual rotationMode
-						if (oldRotationMode == - 1 && !manualCompassDeviation) {
-							oldRotationMode = rotationMode;
-							rotationMode = Configuration.ROTATION_MANUAL;
-							Configuration.setRotation(rotationMode, false);
+				if (!keyboardLocked) {
+					final int pointerIndex = event.findPointerIndex(mtPointerId);
+					int mCount = event.getPointerCount();
+					// pinch zoom when at map screen but not in other screens
+					if (imageCollector != null && imageCollector.isRunning() && mCount > 1 && mtPointerId != INVALID_POINTER_ID) {
+						if (angleDiff((int) pinchZoomOrigAngle, (int) angle(event)) > 20) {
+							rotationStarted = true;
+							// on pinch rotate stop compass readings from rotating the map by setting manual rotationMode
+							if (oldRotationMode == - 1 && !manualCompassDeviation) {
+								oldRotationMode = rotationMode;
+								rotationMode = Configuration.ROTATION_MANUAL;
+								Configuration.setRotation(rotationMode, false);
+							}
+							// restore zoom at start of rotation gesture
+							// to avoid bug is 3450292 on some devices
+							mtPointerDragged(pinchZoomScale);
 						}
-						// restore zoom at start of rotation gesture
-						// to avoid bug is 3450292 on some devices
-						mtPointerDragged(pinchZoomScale);
-					}
-					if (!rotationStarted && ((pinchZoomDistance / dist(event)) > 1.08f || (pinchZoomDistance / dist(event)) < 0.92f)) {
-						zoomStarted = true;
-					}
-					// stop zoom when rotation starts, to avoid bug id 3560292 
-					if (zoomStarted && !rotationStarted) {
-						mtPointerDragged(pinchZoomDistance / dist(event) * pinchZoomScale);
-					}
-					if (rotationStarted) {
-						mtPointerRotated((360*3 + pinchZoomRotation - angle(event)) % 360);
+						if (!rotationStarted && ((pinchZoomDistance / dist(event)) > 1.08f || (pinchZoomDistance / dist(event)) < 0.92f)) {
+							zoomStarted = true;
+						}
+						// stop zoom when rotation starts, to avoid bug id 3560292 
+						if (zoomStarted && !rotationStarted) {
+							mtPointerDragged(pinchZoomDistance / dist(event) * pinchZoomScale);
+						}
+						if (rotationStarted  && !zoomStarted) {
+							mtPointerRotated((360*3 + pinchZoomRotation - angle(event)) % 360);
+						}
 					}
 				}
 				CanvasBridge.current().onTouch(view, event);

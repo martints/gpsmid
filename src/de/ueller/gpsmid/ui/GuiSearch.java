@@ -1704,13 +1704,13 @@ public class GuiSearch extends Canvas implements CommandListener,
 		}
 		int clickIdx = (y - renderDiff - scrollOffset - getExtraOffsetY())/fontSize;
 		//#if polish.android
-		if (clickIdx == 0) {
-			enableNativeKeyboard();
-			if (!Configuration.getCfgBitState(Configuration.CFGBIT_ICONMENUS_SPLITSCREEN)) {
-				cursorKeypad = true;
-			}
-			hideKeypad = false;
-		}
+//		if (clickIdx == 0) {
+//			enableNativeKeyboard();
+//			if (!Configuration.getCfgBitState(Configuration.CFGBIT_ICONMENUS_SPLITSCREEN)) {
+//				cursorKeypad = true;
+//			}
+//			hideKeypad = false;
+//		}
 		//#endif
 
 		if ( (state == STATE_MAIN || state == STATE_FAVORITES)

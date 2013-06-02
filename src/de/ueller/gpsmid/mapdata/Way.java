@@ -1187,8 +1187,8 @@ public class Way extends Entity {
 							float segDirVecY = fSegmentLat1 - fSegmentLat2;
 							float norm = (float) Math.sqrt((double)(segDirVecX * segDirVecX + segDirVecY * segDirVecY));
 							//This is a hack to use a linear approximation to keep computational requirements down
-							if (this.isOneway()) {
-								// Panelty for one ways can be increased until 180 degree
+							if (this.isOneDirectionOnly()) {
+								// Penalty for one direction ways can be increased until 180 degree
 								pen = scalePen * (1.0f - ((segDirVecX * courseVecX + segDirVecY * courseVecY) / norm));
 							} else {
 								pen = scalePen * (1.0f - Math.abs((segDirVecX * courseVecX + segDirVecY * courseVecY) / norm));
